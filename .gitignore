@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+_site/
+.lectrace_cache.json
+frontend/node_modules/
+frontend/dist/
+.DS_Store
+*.swp

@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lectrace"
+version = "1.0.0"
+description = "Write Python lecture code. Get an interactive viewer on GitHub Pages."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "PraiseGod D. Adesanmi", email = "dayopraisegod@gmail.com" }]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+arxiv = ["beautifulsoup4"]
+
+[project.scripts]
+lectrace = "lectrace.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["lectrace"]
+artifacts = ["lectrace/_static/**", "lectrace/_templates/**"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "frontend/node_modules",
+    "frontend/.vite",
+    "docs/",
+    "_site/",
+    ".lectrace_cache.json",
+    "tests/",
+    "scripts/",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "mkdocs-material>=9.5",
+    "mkdocs-minify-plugin>=0.8",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
