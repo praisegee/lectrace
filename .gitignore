@@ -10,5 +10,8 @@ _site/
 .lectrace_cache.json
 frontend/node_modules/
 frontend/dist/
+frontend/**/*.js
+!frontend/eslint.config.js
+frontend/tsconfig.tsbuildinfo
 .DS_Store
 *.swp
