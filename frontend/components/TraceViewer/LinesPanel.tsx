@@ -64,7 +64,7 @@ export function LinesPanel({
     <div className="lines-panel">
       {highlightedLines.map((htmlLine, idx) => {
         const ln = idx + 1;
-        if (hidden.has(ln)) return null;
+        if (!rawMode && hidden.has(ln)) return null;
 
         const loc = `${path}:${ln}`;
         const isCurrent = ln === lineNumber;
