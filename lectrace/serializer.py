@@ -31,38 +31,67 @@ def serialize(value: Any, depth: int = 0) -> dict:
         case int():
             return {"type": "int", "contents": value}
         case float():
-            return {"type": "float", "contents": str(value) if (math.isnan(value) or math.isinf(value)) else value}
+            return {
+                "type": "float",
+                "contents": (
+                    str(value) if (math.isnan(value) or math.isinf(value)) else value
+                ),
+            }
         case str():
             return {"type": "str", "contents": value}
         case complex():
-            return {"type": "complex", "contents": {"real": value.real, "imag": value.imag}}
+            return {
+                "type": "complex",
+                "contents": {"real": value.real, "imag": value.imag},
+            }
         case list() | tuple():
             return {"type": t, "contents": [serialize(v, depth + 1) for v in value]}
         case set() | frozenset():
-            return {"type": t, "contents": [serialize(v, depth + 1) for v in sorted(value, key=repr)]}
+            return {
+                "type": t,
+                "contents": [serialize(v, depth + 1) for v in sorted(value, key=repr)],
+            }
         case dict():
-            return {"type": t, "contents": {_key(k): serialize(v, depth + 1) for k, v in value.items()}}
+            return {
+                "type": t,
+                "contents": {
+                    _key(k): serialize(v, depth + 1) for k, v in value.items()
+                },
+            }
         case datetime.datetime():
             return {"type": t, "contents": value.isoformat()}
         case pathlib.Path():
             return {"type": t, "contents": str(value)}
 
     if dataclasses.is_dataclass(value) and not isinstance(value, type):
-        return {"type": t, "contents": {
-            f.name: serialize(getattr(value, f.name), depth + 1)
-            for f in dataclasses.fields(value)
-        }}
+        return {
+            "type": t,
+            "contents": {
+                f.name: serialize(getattr(value, f.name), depth + 1)
+                for f in dataclasses.fields(value)
+            },
+        }
 
     if (np := _lazy("numpy")) is not None:
         if isinstance(value, np.ndarray):
-            return {"type": t, "dtype": str(value.dtype), "shape": list(value.shape), "contents": value.tolist()}
+            return {
+                "type": t,
+                "dtype": str(value.dtype),
+                "shape": list(value.shape),
+                "contents": value.tolist(),
+            }
         if isinstance(value, np.integer):
             return {"type": t, "contents": int(value)}
         if isinstance(value, np.floating):
             return {"type": t, "contents": float(value)}
 
     if (torch := _lazy("torch")) is not None and isinstance(value, torch.Tensor):
-        return {"type": t, "dtype": str(value.dtype), "shape": list(value.shape), "contents": value.tolist()}
+        return {
+            "type": t,
+            "dtype": str(value.dtype),
+            "shape": list(value.shape),
+            "contents": value.tolist(),
+        }
 
     if (sympy := _lazy("sympy")) is not None and isinstance(value, sympy.Basic):
         if isinstance(value, sympy.Integer):

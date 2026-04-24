@@ -1,6 +1,5 @@
 import type { Trace, Value } from "../../types/trace";
 import { ValueRenderer } from "../renderers/ValueRenderer";
-import { useDrag } from "../../hooks/useDrag";
 import { inSameFunction, isAncestorOf } from "../../hooks/useNavigation";
 
 interface Props {
@@ -9,21 +8,11 @@ interface Props {
 }
 
 export function EnvPanel({ trace, stepIndex }: Props) {
-  const { position, onMouseDown, isDragging } = useDrag({ x: 20, y: 80 });
   const env = buildEnv(trace, stepIndex);
-
   if (Object.keys(env).length === 0) return null;
 
   return (
-    <div
-      className="env-panel"
-      style={{
-        left: position.x,
-        top: position.y,
-        cursor: isDragging.current ? "grabbing" : "grab",
-      }}
-      onMouseDown={onMouseDown}
-    >
+    <div className="env-panel">
       <table className="env-table">
         <tbody>
           {Object.entries(env).map(([name, value]) => (

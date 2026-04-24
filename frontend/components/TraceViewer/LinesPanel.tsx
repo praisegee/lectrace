@@ -73,11 +73,12 @@ export function LinesPanel({
         const renderings = allRenderings.filter((r) => r.type !== "note");
         const notes = allRenderings.filter((r): r is Extract<Rendering, { type: "note" }> => r.type === "note");
 
+        const hasRenderings = !rawMode && renderings.length > 0;
         return (
           <div
             key={ln}
             ref={isCurrent ? scrollRef : null}
-            className={["line", isCurrent ? "current-line" : "", cloaked ? "cloaked" : ""].filter(Boolean).join(" ")}
+            className={["line", isCurrent ? "current-line" : "", cloaked ? "cloaked" : "", hasRenderings ? "has-renderings" : ""].filter(Boolean).join(" ")}
           >
             <span
               className="line-number"

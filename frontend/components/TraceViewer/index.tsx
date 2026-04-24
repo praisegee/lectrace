@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTrace } from "../../hooks/useTrace";
 import { useNavigation } from "../../hooks/useNavigation";
@@ -18,7 +19,7 @@ export function TraceViewer() {
     useNavigation(trace, stepParam, setStep);
 
   const rawMode = params.get("raw") === "1";
-  const animateMode = params.get("animate") !== "0"; // on by default
+  const animateMode = params.get("animate") !== "0";
   const hideEnv = params.get("hideEnv") === "1";
   const showNotes = params.get("showNotes") === "1";
 
@@ -26,6 +27,49 @@ export function TraceViewer() {
     setParams((p) => { p.get(key) ? p.delete(key) : p.set(key, val); return p; });
   const toggleAnimate = () =>
     setParams((p) => { animateMode ? p.set("animate", "0") : p.delete("animate"); return p; });
+
+  // Fullscreen
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  // Resizable env panel
+  const [envWidth, setEnvWidth] = useState(280);
+  const resizeRef = useRef({ active: false, startX: 0, startW: 280 });
+
+  const onResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    resizeRef.current = { active: true, startX: e.clientX, startW: envWidth };
+    document.body.classList.add("resizing");
+  };
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!resizeRef.current.active) return;
+      const delta = e.clientX - resizeRef.current.startX;
+      setEnvWidth(Math.max(160, Math.min(520, resizeRef.current.startW - delta)));
+    };
+    const onUp = () => {
+      resizeRef.current.active = false;
+      document.body.classList.remove("resizing");
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, []);
 
   useKeyboard({
     ArrowRight: stepForward, l: stepForward,
@@ -37,7 +81,8 @@ export function TraceViewer() {
     A: toggleAnimate,
     E: () => toggle("hideEnv", "1"),
     N: () => toggle("showNotes", "1"),
-  }, [trace, stepParam, rawMode, animateMode, hideEnv, showNotes]);
+    F: toggleFullscreen,
+  }, [trace, stepParam, rawMode, animateMode, hideEnv, showNotes, isFullscreen]);
 
   if (!tracePath) return null;
   if (loading) return <div className="status-msg">Loading…</div>;
@@ -55,6 +100,10 @@ export function TraceViewer() {
   const currentPath = frame?.path ?? Object.keys(trace.files)[0];
   const currentLine = frame?.line_number ?? 1;
 
+  // Show the env panel column only if any step up to now has variables
+  const hasEnvContent = !hideEnv &&
+    trace.steps.slice(0, stepIndex + 1).some(s => Object.keys(s.env).length > 0);
+
   const gotoLine = (ln: number) => {
     const dir = ln > currentLine ? 1 : -1;
     let i = stepIndex + dir;
@@ -66,7 +115,6 @@ export function TraceViewer() {
       }
       i += dir;
     }
-    setParams((p) => { p.set("step", String(stepIndex)); return p; });
   };
 
   const gotoLocation = (path: string, ln: number) => {
@@ -90,6 +138,7 @@ export function TraceViewer() {
         animateMode={animateMode}
         hideEnv={hideEnv}
         showNotes={showNotes}
+        isFullscreen={isFullscreen}
         onStepForward={stepForward}
         onStepBackward={stepBackward}
         onStepOverForward={stepOverForward}
@@ -99,20 +148,30 @@ export function TraceViewer() {
         onToggleAnimate={toggleAnimate}
         onToggleEnv={() => toggle("hideEnv", "1")}
         onToggleNotes={() => toggle("showNotes", "1")}
+        onToggleFullscreen={toggleFullscreen}
       />
       <div className="viewer-body">
-        <LinesPanel
-          trace={trace}
-          path={currentPath}
-          lineNumber={currentLine}
-          stepIndex={stepIndex}
-          rawMode={rawMode}
-          animateMode={animateMode}
-          showNotes={showNotes}
-          onGotoLine={gotoLine}
-          onGotoLocation={gotoLocation}
-        />
-        {!hideEnv && <EnvPanel trace={trace} stepIndex={stepIndex} />}
+        <div className="viewer-code">
+          <LinesPanel
+            trace={trace}
+            path={currentPath}
+            lineNumber={currentLine}
+            stepIndex={stepIndex}
+            rawMode={rawMode}
+            animateMode={animateMode}
+            showNotes={showNotes}
+            onGotoLine={gotoLine}
+            onGotoLocation={gotoLocation}
+          />
+        </div>
+        {hasEnvContent && (
+          <>
+            <div className="viewer-resize-handle" onMouseDown={onResizeStart} />
+            <div className="env-wrapper" style={{ width: envWidth }}>
+              <EnvPanel trace={trace} stepIndex={stepIndex} />
+            </div>
+          </>
+        )}
       </div>
       {trace.metadata.error && (
         <div className="trace-error-banner">
