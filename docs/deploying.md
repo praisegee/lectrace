@@ -39,7 +39,7 @@ git push
 GitHub Actions runs, builds your lectures, and deploys them. Your site is live at:
 
 ```
-https://praisegee.github.io/your-repo-name/
+https://your-username.github.io/your-repo-name/
 ```
 
 ---
