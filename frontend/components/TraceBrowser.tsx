@@ -10,7 +10,12 @@ export function TraceBrowser() {
   useEffect(() => {
     fetch("./traces/index.json")
       .then((r) => r.json())
-      .then(setIndex)
+      .then((data: TraceIndex) => {
+        setIndex(data);
+        if (!params.get("trace") && data.traces.length > 0) {
+          setParams((p) => { p.set("trace", data.traces[0].id); return p; });
+        }
+      })
       .catch(() => null);
   }, []);
 
