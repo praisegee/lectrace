@@ -4,6 +4,8 @@ Write Python lecture code. Get an interactive step-through viewer on GitHub Page
 
 lectrace traces your Python code line by line using `sys.settrace`, captures variable state and rendered content at each step, and produces a static React app that lets anyone step through the execution with arrow keys. No Node.js, no configuration, no build step for the user — just Python.
 
+> Inspired by [edtrace](https://github.com/percyliang/edtrace) by Percy Liang.
+
 ---
 
 ## Install
@@ -170,6 +172,3 @@ Full documentation: **https://praisegee.github.io/lectrace/**
 - [Deploying](https://praisegee.github.io/lectrace/deploying/)
 - [API Reference](https://praisegee.github.io/lectrace/api-reference/)
 
----
-
-Inspired by [edtrace](https://github.com/percyliang/edtrace) by Percy Liang.
