@@ -88,12 +88,11 @@ export function LinesPanel({
               {ln}
             </span>
             {!rawMode && renderings.length > 0 ? (
-              <span className="renderings">
-                <span className="indent" dangerouslySetInnerHTML={{ __html: htmlLine.match(/^(\s*)/)?.[0] ?? "" }} />
+              <div className="renderings">
                 {renderings.map((r, i) => (
-                  <span key={i}>{renderRendering(r, onGotoLocation)}</span>
+                  <div key={i}>{renderRendering(r, onGotoLocation)}</div>
                 ))}
-              </span>
+              </div>
             ) : (
               <span
                 className="code-line"

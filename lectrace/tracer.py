@@ -66,6 +66,19 @@ def _statement_lines(source_text: str) -> set[int]:
     return {node.lineno for node in ast.walk(tree) if isinstance(node, ast.stmt)}
 
 
+def _statement_spans(source_text: str) -> dict[int, int]:
+    """Return mapping of statement start line → end line."""
+    try:
+        tree = ast.parse(source_text)
+    except SyntaxError:
+        return {}
+    return {
+        node.lineno: node.end_lineno
+        for node in ast.walk(tree)
+        if isinstance(node, ast.stmt) and node.end_lineno
+    }
+
+
 def execute(source: Path, inspect_all: bool = False) -> Trace:
     import importlib.util
 
@@ -75,7 +88,9 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
     error: TraceError | None = None
 
     src_text = source.read_text(encoding="utf-8")
+    src_lines = src_text.split("\n")
     stmt_lines = _statement_lines(src_text)
+    stmt_spans = _statement_spans(src_text)
 
     spec = importlib.util.spec_from_file_location("_lecture", source)
     assert spec and spec.loader
@@ -115,7 +130,8 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         if current.function_name in ("<listcomp>", "<genexpr>", "<setcomp>", "<dictcomp>"):
             return on_line
 
-        directives = parse(current.source_line)
+        end_ln = stmt_spans.get(frame.f_lineno, frame.f_lineno)
+        directives = [d for ln in src_lines[frame.f_lineno - 1 : end_ln] for d in parse(ln)]
 
         if has(directives, STEPOVER):
             key = (current.path, current.line_number)
@@ -207,7 +223,11 @@ def _under_stepover(stack: list[StackFrame], stepovers: list[tuple[str, int]]) -
     return False
 
 
-def _string_interior_lines(source_text: str) -> set[int]:
+_RENDER_FNS = frozenset({"text", "note", "plot", "image", "video", "link", "system_text"})
+
+
+def _render_interior_lines(source_text: str) -> set[int]:
+    """Return lines that are continuations of multi-line render function calls."""
     try:
         tree = ast.parse(source_text)
     except SyntaxError:
@@ -217,12 +237,10 @@ def _string_interior_lines(source_text: str) -> set[int]:
         if not isinstance(node, ast.Call):
             continue
         func = node.func
-        if not (isinstance(func, ast.Name) and func.id in ("text", "note")):
+        if not (isinstance(func, ast.Name) and func.id in _RENDER_FNS):
             continue
-        for arg in node.args:
-            if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-                if arg.end_lineno and arg.end_lineno > arg.lineno:
-                    hidden.update(range(arg.lineno + 1, arg.end_lineno + 1))
+        if node.end_lineno and node.end_lineno > node.lineno:
+            hidden.update(range(node.lineno + 1, node.end_lineno + 1))
     return hidden
 
 
@@ -233,6 +251,6 @@ def _hidden_lines(files: dict[str, str]) -> dict[str, list[int]]:
         for i, line in enumerate(contents.split("\n"), start=1):
             if has(parse(line), HIDE):
                 hidden.add(i)
-        hidden |= _string_interior_lines(contents)
+        hidden |= _render_interior_lines(contents)
         result[path] = sorted(hidden)
     return result

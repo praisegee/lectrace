@@ -10,14 +10,10 @@ interface Props {
 
 export function MarkdownView({ content, style }: Props) {
   return (
-    <ReactMarkdown
-      remarkPlugins={[remarkMath]}
-      rehypePlugins={[rehypeKatex]}
-      components={{
-        p: ({ children }) => <span style={style}>{children}</span>,
-      }}
-    >
-      {content}
-    </ReactMarkdown>
+    <div style={style} className="markdown-content">
+      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+        {content}
+      </ReactMarkdown>
+    </div>
   );
 }
