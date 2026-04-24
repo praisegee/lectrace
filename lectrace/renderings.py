@@ -2,6 +2,7 @@ from __future__ import annotations
 import inspect
 import re
 import subprocess
+import textwrap
 import threading
 from dataclasses import dataclass
 from pathlib import Path
@@ -41,13 +42,10 @@ def flush() -> list[Rendering]:
 
 
 def text(message: str, style: dict | None = None, verbatim: bool = False) -> None:
-    extra: dict = {}
-    if verbatim:
-        extra = {"fontFamily": "monospace", "whiteSpace": "pre"}
+    message = textwrap.dedent(message).strip()
+    extra: dict = {"fontFamily": "monospace", "whiteSpace": "pre"} if verbatim else {}
     merged = {**extra, **(style or {})} or None
-    lines = message.split("\n") if verbatim else [message]
-    for line in lines:
-        _store().append(Rendering(type="markdown", data=line, style=merged))
+    _store().append(Rendering(type="markdown", data=message, style=merged))
 
 
 def image(url: str, style: dict | None = None, width: int | str | None = None) -> None:
@@ -87,7 +85,7 @@ def plot(spec: object) -> None:
 
 
 def note(message: str) -> None:
-    _store().append(Rendering(type="note", data=message))
+    _store().append(Rendering(type="note", data=textwrap.dedent(message).strip()))
 
 
 def system_text(command: list[str]) -> None:

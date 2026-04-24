@@ -1,4 +1,5 @@
 from __future__ import annotations
+import ast
 import hashlib
 import sys
 import traceback as tb
@@ -56,6 +57,15 @@ class Trace:
     steps: list[Step]
 
 
+def _statement_lines(source_text: str) -> set[int]:
+    """Return line numbers that begin a statement (not sub-expression continuations)."""
+    try:
+        tree = ast.parse(source_text)
+    except SyntaxError:
+        return set()
+    return {node.lineno for node in ast.walk(tree) if isinstance(node, ast.stmt)}
+
+
 def execute(source: Path, inspect_all: bool = False) -> Trace:
     import importlib.util
 
@@ -63,6 +73,9 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
     visible: set[str] = set()
     stepovers: list[tuple[str, int]] = []
     error: TraceError | None = None
+
+    src_text = source.read_text(encoding="utf-8")
+    stmt_lines = _statement_lines(src_text)
 
     spec = importlib.util.spec_from_file_location("_lecture", source)
     assert spec and spec.loader
@@ -88,6 +101,9 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             return on_line
 
         if event == "return":
+            return on_line
+
+        if frame.f_lineno not in stmt_lines:
             return on_line
 
         stack = build_stack()
@@ -161,10 +177,9 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         sys.settrace(None)
         sys.modules.pop("_lecture", None)
 
-    src_text = source.read_text(encoding="utf-8")
     files = {relativize(source.resolve()): src_text}
     hidden = _hidden_lines(files)
-    src_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+    src_hash = hashlib.sha256(src_text.encode()).hexdigest()
 
     metadata = TraceMetadata(
         title=source.stem,

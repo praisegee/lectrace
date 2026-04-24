@@ -21,15 +21,27 @@ text("Euler's identity: $e^{i\\pi} + 1 = 0$")
 text("Display math: $$\\sum_{k=0}^{n} k = \\frac{n(n+1)}{2}$$")
 ```
 
+Multi-line strings — including triple-quoted docstrings — are automatically dedented and trimmed, so you can write naturally without worrying about indentation:
+
+```python
+text("""
+    # Gradient Descent
+
+    Training a model means finding parameters that minimize a loss function.
+    Gradient descent is how we do it — follow the slope downhill, step by step.
+
+    The update rule: $w \\leftarrow w - \\eta \\nabla L(w)$
+""")
+```
+
 For monospace output that preserves whitespace, use `verbatim=True`:
 
 ```python
-text(
-    "insert   O(log n)   O(n)\n"
-    "search   O(log n)   O(n)\n"
-    "delete   O(log n)   O(n)",
-    verbatim=True,
-)
+text("""
+    insert   O(log n)   O(n)
+    search   O(log n)   O(n)
+    delete   O(log n)   O(n)
+""", verbatim=True)
 ```
 
 **Signature:**
@@ -175,9 +187,16 @@ Add a presenter annotation that appears beside the line when Notes mode is activ
 ```python
 values = [5, 3, 7, 1]  # @inspect values
 note("deliberately unsorted — worst case is sorted input")
+
+# or multi-line:
+note("""
+    This is the classic birthday paradox setup.
+    With 23 people, collision probability exceeds 50%.
+    Ask the audience to guess before revealing.
+""")
 ```
 
-Notes are hidden by default. They're intended for presenter context that would be distracting when students browse the lecture on their own.
+Notes are hidden by default. They're intended for presenter context that would be distracting when students browse the lecture on their own. Like `text()`, triple-quoted strings are dedented automatically.
 
 **Signature:**
 
