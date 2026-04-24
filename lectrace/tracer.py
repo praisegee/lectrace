@@ -207,6 +207,25 @@ def _under_stepover(stack: list[StackFrame], stepovers: list[tuple[str, int]]) -
     return False
 
 
+def _string_interior_lines(source_text: str) -> set[int]:
+    try:
+        tree = ast.parse(source_text)
+    except SyntaxError:
+        return set()
+    hidden: set[int] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not (isinstance(func, ast.Name) and func.id in ("text", "note")):
+            continue
+        for arg in node.args:
+            if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                if arg.end_lineno and arg.end_lineno > arg.lineno:
+                    hidden.update(range(arg.lineno + 1, arg.end_lineno + 1))
+    return hidden
+
+
 def _hidden_lines(files: dict[str, str]) -> dict[str, list[int]]:
     result = {}
     for path, contents in files.items():
@@ -214,18 +233,6 @@ def _hidden_lines(files: dict[str, str]) -> dict[str, list[int]]:
         for i, line in enumerate(contents.split("\n"), start=1):
             if has(parse(line), HIDE):
                 hidden.add(i)
-        # hide continuation lines of multi-line simple statements (docstrings, long calls, etc.)
-        # compound statements (def, for, if, class, while) are excluded via hasattr("body")
-        try:
-            tree = ast.parse(contents)
-            for node in ast.walk(tree):
-                if (isinstance(node, ast.stmt)
-                        and not hasattr(node, "body")
-                        and node.end_lineno
-                        and node.end_lineno > node.lineno):
-                    for lineno in range(node.lineno + 1, node.end_lineno + 1):
-                        hidden.add(lineno)
-        except SyntaxError:
-            pass
+        hidden |= _string_interior_lines(contents)
         result[path] = sorted(hidden)
     return result
