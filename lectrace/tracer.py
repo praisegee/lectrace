@@ -210,9 +210,18 @@ def _under_stepover(stack: list[StackFrame], stepovers: list[tuple[str, int]]) -
 def _hidden_lines(files: dict[str, str]) -> dict[str, list[int]]:
     result = {}
     for path, contents in files.items():
-        hidden = []
+        hidden: set[int] = set()
         for i, line in enumerate(contents.split("\n"), start=1):
             if has(parse(line), HIDE):
-                hidden.append(i)
-        result[path] = hidden
+                hidden.add(i)
+        # hide continuation lines of multi-line statements (string bodies, closing parens, etc.)
+        try:
+            tree = ast.parse(contents)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.stmt) and node.end_lineno and node.end_lineno > node.lineno:
+                    for lineno in range(node.lineno + 1, node.end_lineno + 1):
+                        hidden.add(lineno)
+        except SyntaxError:
+            pass
+        result[path] = sorted(hidden)
     return result
