@@ -256,6 +256,7 @@ body.resizing {
   font-size: 13px;
   line-height: 1.6;
   padding: 8px 0;
+  max-width: 860px;
 }
 
 .line {
@@ -324,6 +325,17 @@ body.resizing {
 
 /* Environment panel */
 
+.env-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
 .env-panel {
   font-family: var(--font-code);
 }
@@ -335,6 +347,10 @@ body.resizing {
   width: 100%;
 }
 
+.env-table tr + tr td {
+  padding-top: 5px;
+}
+
 .env-table td {
   padding: 2px 6px 2px 0;
   vertical-align: top;
@@ -344,6 +360,16 @@ body.resizing {
   font-weight: 600;
   color: var(--color-accent);
   white-space: nowrap;
+  padding-right: 6px !important;
+}
+
+.env-type {
+  display: block;
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--color-muted);
+  margin-top: 1px;
+  font-family: var(--font-code);
 }
 
 .env-eq {
@@ -351,7 +377,23 @@ body.resizing {
   padding: 0 4px !important;
 }
 
+.env-val {
+  max-width: 100%;
+}
+
 /* Matrices / tensors */
+
+.tensor-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tensor-label {
+  font-size: 10px;
+  color: var(--color-muted);
+  font-family: var(--font-code);
+}
 
 .matrix {
   border-collapse: collapse;
@@ -359,11 +401,22 @@ body.resizing {
 }
 
 .matrix td {
-  border: 1px solid #c8d0da;
-  padding: 1px 5px;
+  padding: 1px 6px;
   text-align: right;
+  font-size: 11.5px;
+  min-width: 2.2em;
+  font-variant-numeric: tabular-nums;
+}
+
+.matrix tr:nth-child(odd) td {
+  background: #f6f8fa;
+}
+
+.matrix-ellipsis {
+  text-align: center;
+  color: var(--color-muted);
   font-size: 12px;
-  min-width: 2em;
+  padding: 0 !important;
 }
 
 .dict {
@@ -374,15 +427,108 @@ body.resizing {
 .dict td {
   padding: 1px 4px;
   font-size: 12px;
+  vertical-align: top;
 }
 
 .dict-key {
   color: var(--color-accent);
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .dict-sep {
   color: var(--color-muted);
+  padding: 0 2px !important;
 }
+
+/* Collapsible values */
+
+.value-root {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.value-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-code);
+  font-size: 11.5px;
+  color: var(--color-muted);
+  padding: 0;
+  line-height: 1.4;
+}
+
+.value-toggle:hover {
+  color: var(--color-accent);
+}
+
+.value-collapsible {
+  color: var(--color-text);
+  font-size: 11.5px;
+}
+
+.value-collapsible:hover {
+  color: var(--color-accent);
+}
+
+.value-more {
+  background: #f0f6ff;
+  border-radius: 3px;
+  padding: 0 4px;
+  color: var(--color-accent);
+  font-size: 11px;
+}
+
+.value-more:hover {
+  background: #dbeafe;
+}
+
+.value-complex {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.value-list-inline {
+  font-family: var(--font-code);
+  font-size: 12px;
+}
+
+.value-sep {
+  color: var(--color-muted);
+}
+
+.value-list-table {
+  border-collapse: collapse;
+  margin-top: 2px;
+}
+
+.value-list-table td {
+  padding: 1px 6px 1px 0;
+  font-size: 12px;
+  vertical-align: top;
+}
+
+.list-index {
+  color: var(--color-muted);
+  font-size: 10px;
+  padding-right: 6px !important;
+  user-select: none;
+  text-align: right;
+  min-width: 1.4em;
+}
+
+/* Value type colours */
+
+.value-num  { color: #0550ae; }
+.value-bool { color: #8250df; }
+.value-none { color: var(--color-muted); }
+.value-str  { color: #0a3069; }
+.value-sympy { color: #8250df; font-style: italic; }
+.value-empty { color: var(--color-muted); }
+.value-muted { color: var(--color-muted); font-size: 11px; }
+.value-unknown { color: var(--color-error); font-size: 11px; }
 
 /* External link cards */
 

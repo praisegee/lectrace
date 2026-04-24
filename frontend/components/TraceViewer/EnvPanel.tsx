@@ -1,5 +1,5 @@
 import type { Trace, Value } from "../../types/trace";
-import { ValueRenderer } from "../renderers/ValueRenderer";
+import { ValueRenderer, shortType } from "../renderers/ValueRenderer";
 import { inSameFunction, isAncestorOf } from "../../hooks/useNavigation";
 
 interface Props {
@@ -13,13 +13,17 @@ export function EnvPanel({ trace, stepIndex }: Props) {
 
   return (
     <div className="env-panel">
+      <div className="env-header">Variables</div>
       <table className="env-table">
         <tbody>
           {Object.entries(env).map(([name, value]) => (
             <tr key={name}>
-              <td className="env-key">{name}</td>
+              <td className="env-key">
+                {name}
+                <span className="env-type">{shortType(value)}</span>
+              </td>
               <td className="env-eq">=</td>
-              <td><ValueRenderer value={value} /></td>
+              <td className="env-val"><ValueRenderer value={value} /></td>
             </tr>
           ))}
         </tbody>
@@ -44,10 +48,8 @@ function buildEnv(trace: Trace, stepIndex: number): Record<string, Value> {
   envs.reverse();
   const merged: Record<string, Value | null> = {};
   for (const e of envs) Object.assign(merged, e);
-
   for (const key of Object.keys(merged)) {
     if (merged[key] === null) delete merged[key];
   }
-
   return merged as Record<string, Value>;
 }
