@@ -38,10 +38,10 @@ def main():
     text(f"Found 23 at index `{result}`.")
     note("Binary search only works on sorted arrays.")
 
-def binary_search(arr, target):  # @inspect
+def binary_search(arr, target):
     lo, hi = 0, len(arr) - 1
     while lo <= hi:
-        mid = (lo + hi) // 2    # @inspect mid
+        mid = (lo + hi) // 2
         if arr[mid] == target:
             return mid
         elif arr[mid] < target:
@@ -72,7 +72,19 @@ lectrace loads your file silently (running imports and defining functions), then
 - **`main()` and every function it calls** — stepped through line by line
 - **Functions defined but never called** — invisible
 
-When execution enters a helper function, the viewer shows the `def` line first (with the function's arguments already visible in the variable panel), then steps through the body. When the function returns, the viewer jumps back to the call site in `main()`.
+When execution enters a helper function, the viewer shows the `def` line first with the function's arguments already in the variable panel, then steps through the body line by line. When the function returns, the viewer jumps back to the call site.
+
+---
+
+## Variable panel
+
+The variable panel on the right shows state at each step:
+
+- **Inside `main()`** — only variables explicitly marked with `# @inspect` are shown
+- **Inside any called function** — all local variables are shown automatically, no directives needed
+- **Call stack** — displayed above the variables when inside a helper function, showing the full chain of calls
+- **New variables** — highlighted in green when they first appear
+- **Changed variables** — highlighted in amber when their value changes
 
 ---
 
@@ -82,10 +94,10 @@ Directives are inline comments that control tracing and display:
 
 | Directive | Effect |
 |-----------|--------|
-| `# @inspect x y` | Show `x` and `y` in the variable panel after this line runs |
-| `# @inspect` | Show **all** local variables after this line; if on a `def` line, inspect all locals on every call to that function |
+| `# @inspect x y` | Show `x` and `y` in the variable panel after this line (use in `main()`) |
+| `# @inspect` | Show all local variables at this line in `main()` |
 | `# @clear x` | Remove `x` from the variable panel |
-| `# @stepover` | Execute this line as a single step — don't trace into any calls it makes |
+| `# @stepover` | Execute this line without stepping into any calls it makes |
 | `# @hide` | Run this line silently — never shown in the viewer |
 
 ---
@@ -128,6 +140,28 @@ class Node:
 ```
 
 Without `__lectrace__`, nested objects show their full repr. With it, you control exactly what students see.
+
+---
+
+## Viewer
+
+The viewer is a mobile-responsive React app that works in any browser — no installation required for viewers.
+
+**Keyboard shortcuts (desktop):**
+
+| Key | Action |
+|-----|--------|
+| `→` or `l` | Step forward |
+| `←` or `h` | Step backward |
+| `Shift+→` or `j` | Step over forward (skip into sub-calls) |
+| `Shift+←` or `k` | Step over backward |
+| `u` | Step out of current function |
+| `R` | Toggle raw code view |
+| `A` | Toggle reveal animation |
+| `E` | Toggle variable panel |
+| `F` | Toggle fullscreen |
+
+**Mobile:** swipe left/right to step, tap the Variables bar at the bottom to expand the variable panel, use the fixed navigation bar for step controls.
 
 ---
 
