@@ -20,17 +20,27 @@ Requires Python 3.11+. Zero mandatory dependencies — lectrace uses the standar
 
 ---
 
-## A lecture file
+## The recommended pattern
 
-A lecture is any `.py` file that imports from `lectrace` and defines a `main()` function:
+A lecture file is a plain Python script. Define `main()` first, put helper functions below it, and call `main()` at the end with the standard guard. This is valid Python — functions defined below `main()` are resolved at call time, not definition time.
 
 ```python
 # 01_binary_search.py
-from lectrace import text, link
+from lectrace import text, note, plot
 
-def binary_search(arr, target):
+def main():
+    text("# Binary Search")
+    text("Finds a target in a sorted array in $O(\\log n)$ time.")
+
+    arr = [2, 5, 8, 12, 16, 23, 38, 42]  # @inspect arr
+    result = binary_search(arr, 23)        # @inspect result
+
+    text(f"Found 23 at index `{result}`.")
+    note("Binary search only works on sorted arrays.")
+
+def binary_search(arr, target):  # @inspect
     lo, hi = 0, len(arr) - 1
-    while lo <= hi:              # @inspect lo hi
+    while lo <= hi:
         mid = (lo + hi) // 2    # @inspect mid
         if arr[mid] == target:
             return mid
@@ -40,16 +50,29 @@ def binary_search(arr, target):
             hi = mid - 1
     return -1
 
-def main():
-    text("# Binary Search")
-    text("Finds a target in a sorted array in $O(\\log n)$ time.")
-
-    arr = [2, 5, 8, 12, 16, 23, 38, 42]  # @inspect arr
-    result = binary_search(arr, 23)       # @inspect result
-
-    text(f"Found 23 at index `{result}`")
-    link(binary_search)   # click to jump to the function definition
+if __name__ == "__main__":
+    main()
 ```
+
+**What this gives you:**
+
+- Run `python 01_binary_search.py` — works as a plain script, no lectrace involvement
+- Run `lectrace serve` — opens the interactive viewer in your browser
+- Push to GitHub — viewer deploys automatically to GitHub Pages
+
+The tracer only traces code that runs inside `main()`. Imports and function definitions are invisible — they're just setup. Other functions appear in the viewer only when `main()` actually calls them.
+
+---
+
+## How tracing works
+
+lectrace loads your file silently (running imports and defining functions), then calls `main()` with the tracer active. The result:
+
+- **Module-level code** (imports, `def` statements) — never generates a step
+- **`main()` and every function it calls** — stepped through line by line
+- **Functions defined but never called** — invisible
+
+When execution enters a helper function, the viewer shows the `def` line first (with the function's arguments already visible in the variable panel), then steps through the body. When the function returns, the viewer jumps back to the call site in `main()`.
 
 ---
 
@@ -60,6 +83,7 @@ Directives are inline comments that control tracing and display:
 | Directive | Effect |
 |-----------|--------|
 | `# @inspect x y` | Show `x` and `y` in the variable panel after this line runs |
+| `# @inspect` | Show **all** local variables after this line; if on a `def` line, inspect all locals on every call to that function |
 | `# @clear x` | Remove `x` from the variable panel |
 | `# @stepover` | Execute this line as a single step — don't trace into any calls it makes |
 | `# @hide` | Run this line silently — never shown in the viewer |
@@ -76,10 +100,10 @@ Call these anywhere inside `main()` or any function it calls:
 | `text("...", verbatim=True)` | Monospace, whitespace preserved |
 | `image("fig.png", width=400)` | Local file or remote URL (cached) |
 | `video("demo.mp4")` | Embedded video with controls |
-| `link(MyClass)` | Clickable jump to that class or function in the viewer |
+| `link(my_function)` | Clickable jump to that function in the viewer |
 | `link(title="Paper", url="...", authors=["Smith"], date="2024")` | Reference card with hover metadata |
 | `plot({...})` | Interactive Vega-Lite chart |
-| `note("speaker annotation")` | Presenter note, hidden until `N` is pressed |
+| `note("speaker annotation")` | Presenter note shown as a styled callout |
 | `system_text(["python3", "--version"])` | Shell command output as verbatim text |
 
 ---
@@ -154,7 +178,7 @@ Enable GitHub Pages in your repo settings (Source: **GitHub Actions**). Every pu
 
 ## How it works
 
-- **Tracer** — `sys.settrace` intercepts every line of execution. At each step it captures the call stack, inspected variable values (serialized to JSON), and any pending renderings.
+- **Tracer** — loads the module without tracing (so imports and `def` statements are invisible), then activates `sys.settrace` and calls `main()`. Every step the viewer shows is inside a function that was actually called.
 - **Serializer** — converts Python values to JSON. Primitives are direct. Collections recurse. numpy/torch/sympy are imported lazily only when encountered.
 - **Builder** — discovers lecture files, runs each through the tracer, writes `traces/*.json` plus a `traces/index.json` manifest. Incremental: files are skipped if their SHA-256 hash hasn't changed.
 - **Viewer** — a pre-built React + TypeScript SPA bundled into `lectrace/_static/` and shipped inside the pip package. Uses HashRouter so it works at any URL depth with zero configuration. Math via KaTeX, charts via Vega-Lite, syntax highlighting via highlight.js.
@@ -171,4 +195,3 @@ Full documentation: **https://praisegee.github.io/lectrace/**
 - [Custom Types](https://praisegee.github.io/lectrace/custom-types/)
 - [Deploying](https://praisegee.github.io/lectrace/deploying/)
 - [API Reference](https://praisegee.github.io/lectrace/api-reference/)
-
