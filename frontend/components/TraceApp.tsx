@@ -1,17 +1,32 @@
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { TraceBrowser } from "./TraceBrowser";
 import { TraceViewer } from "./TraceViewer";
 
 export function TraceApp() {
   const [params, setParams] = useSearchParams();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const tracePath = params.get("trace");
 
+  const toggleSidebar = () => {
+    const isMobile = window.matchMedia("(max-width: 640px)").matches;
+    if (isMobile) {
+      setDrawerOpen(d => !d);
+    } else {
+      setSidebarOpen(s => !s);
+    }
+  };
+
   return (
-    <div className="app-layout">
-      <TraceBrowser />
+    <div className={`app-layout${sidebarOpen ? "" : " sidebar-collapsed"}`}>
+      {drawerOpen && (
+        <div className="drawer-backdrop" onClick={() => setDrawerOpen(false)} />
+      )}
+      <TraceBrowser open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <main className="app-main">
         {tracePath ? (
-          <TraceViewer />
+          <TraceViewer onToggleSidebar={toggleSidebar} />
         ) : (
           <TracePrompt onSelect={(id) => setParams({ trace: id })} />
         )}

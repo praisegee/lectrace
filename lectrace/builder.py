@@ -100,6 +100,9 @@ def _copy_static(dest: Path) -> None:
         raise RuntimeError(
             "Pre-built frontend missing. Run: bash scripts/build_frontend.sh"
         )
+    assets_dest = dest / "assets"
+    if assets_dest.exists():
+        shutil.rmtree(assets_dest)
     for item in static.rglob("*"):
         if item.is_file():
             target = dest / item.relative_to(static)

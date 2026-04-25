@@ -3,11 +3,18 @@ import { useSearchParams } from "react-router-dom";
 import { useTrace } from "../../hooks/useTrace";
 import { useNavigation } from "../../hooks/useNavigation";
 import { useKeyboard } from "../../hooks/useKeyboard";
+import { useSwipe } from "../../hooks/useSwipe";
 import { NavigationBar } from "./NavigationBar";
 import { LinesPanel } from "./LinesPanel";
 import { EnvPanel } from "./EnvPanel";
+import { MobileBottomNav } from "./MobileBottomNav";
+import { ChevronDownIcon, ChevronUpIcon } from "../icons";
 
-export function TraceViewer() {
+interface Props {
+  onToggleSidebar: () => void;
+}
+
+export function TraceViewer({ onToggleSidebar }: Props) {
   const [params, setParams] = useSearchParams();
   const tracePath = params.get("trace");
   const stepParam = parseInt(params.get("step") ?? "0") || 0;
@@ -21,7 +28,6 @@ export function TraceViewer() {
   const rawMode = params.get("raw") === "1";
   const animateMode = params.get("animate") !== "0";
   const hideEnv = params.get("hideEnv") === "1";
-  const showNotes = params.get("showNotes") === "1";
 
   const toggle = (key: string, val: string) =>
     setParams((p) => { p.get(key) ? p.delete(key) : p.set(key, val); return p; });
@@ -43,9 +49,10 @@ export function TraceViewer() {
     return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
 
-  // Resizable env panel
+  // Resizable env panel (desktop)
   const [envWidth, setEnvWidth] = useState(280);
   const resizeRef = useRef({ active: false, startX: 0, startW: 280 });
+  const [mobileEnvOpen, setMobileEnvOpen] = useState(true);
 
   const onResizeStart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -71,6 +78,9 @@ export function TraceViewer() {
     };
   }, []);
 
+  // Swipe to step on mobile
+  const swipe = useSwipe(stepForward, stepBackward);
+
   useKeyboard({
     ArrowRight: stepForward, l: stepForward,
     ArrowLeft: stepBackward, h: stepBackward,
@@ -80,9 +90,8 @@ export function TraceViewer() {
     R: () => toggle("raw", "1"),
     A: toggleAnimate,
     E: () => toggle("hideEnv", "1"),
-    N: () => toggle("showNotes", "1"),
     F: toggleFullscreen,
-  }, [trace, stepParam, rawMode, animateMode, hideEnv, showNotes, isFullscreen]);
+  }, [trace, stepParam, rawMode, animateMode, hideEnv, isFullscreen]);
 
   if (!tracePath) return null;
   if (loading) return <div className="status-msg">Loading…</div>;
@@ -100,7 +109,6 @@ export function TraceViewer() {
   const currentPath = frame?.path ?? Object.keys(trace.files)[0];
   const currentLine = frame?.line_number ?? 1;
 
-  // Show the env panel column only if any step up to now has variables
   const hasEnvContent = !hideEnv &&
     trace.steps.slice(0, stepIndex + 1).some(s => Object.keys(s.env).length > 0);
 
@@ -109,10 +117,7 @@ export function TraceViewer() {
     let i = stepIndex + dir;
     while (i >= 0 && i < trace.steps.length) {
       const f = trace.steps[i].stack.at(-1);
-      if (f?.path === currentPath && f.line_number === ln) {
-        setStep(i);
-        return;
-      }
+      if (f?.path === currentPath && f.line_number === ln) { setStep(i); return; }
       i += dir;
     }
   };
@@ -128,17 +133,22 @@ export function TraceViewer() {
     });
   };
 
+  const envVarCount = Object.keys(
+    trace.steps.slice(0, stepIndex + 1).reduce((acc, s) => ({ ...acc, ...s.env }), {})
+  ).length;
+
   return (
     <div className="viewer-layout">
       <NavigationBar
         path={currentPath}
+        title={trace.metadata.title}
         stepIndex={stepIndex}
         totalSteps={trace.steps.length}
         rawMode={rawMode}
         animateMode={animateMode}
         hideEnv={hideEnv}
-        showNotes={showNotes}
         isFullscreen={isFullscreen}
+        onToggleSidebar={onToggleSidebar}
         onStepForward={stepForward}
         onStepBackward={stepBackward}
         onStepOverForward={stepOverForward}
@@ -147,11 +157,14 @@ export function TraceViewer() {
         onToggleRaw={() => toggle("raw", "1")}
         onToggleAnimate={toggleAnimate}
         onToggleEnv={() => toggle("hideEnv", "1")}
-        onToggleNotes={() => toggle("showNotes", "1")}
         onToggleFullscreen={toggleFullscreen}
       />
       <div className="viewer-body">
-        <div className="viewer-code">
+        <div
+          className="viewer-code"
+          onTouchStart={swipe.onTouchStart}
+          onTouchEnd={swipe.onTouchEnd}
+        >
           <LinesPanel
             trace={trace}
             path={currentPath}
@@ -159,7 +172,6 @@ export function TraceViewer() {
             stepIndex={stepIndex}
             rawMode={rawMode}
             animateMode={animateMode}
-            showNotes={showNotes}
             onGotoLine={gotoLine}
             onGotoLocation={gotoLocation}
           />
@@ -168,11 +180,29 @@ export function TraceViewer() {
           <>
             <div className="viewer-resize-handle" onMouseDown={onResizeStart} />
             <div className="env-wrapper" style={{ width: envWidth }}>
-              <EnvPanel trace={trace} stepIndex={stepIndex} />
+              <div
+                className="mobile-env-header"
+                onClick={() => setMobileEnvOpen(o => !o)}
+                role="button"
+                aria-expanded={mobileEnvOpen}
+              >
+                <span>Variables {envVarCount > 0 ? `(${envVarCount})` : ""}</span>
+                {mobileEnvOpen ? <ChevronUpIcon size={13} /> : <ChevronDownIcon size={13} />}
+              </div>
+              <div className={`env-panel-wrap${mobileEnvOpen ? "" : " env-panel-wrap--closed"}`}>
+                <EnvPanel trace={trace} stepIndex={stepIndex} />
+              </div>
             </div>
           </>
         )}
       </div>
+      <MobileBottomNav
+        onStepBackward={stepBackward}
+        onStepForward={stepForward}
+        onStepOverBackward={stepOverBackward}
+        onStepOverForward={stepOverForward}
+        onStepUp={stepUp}
+      />
       {trace.metadata.error && (
         <div className="trace-error-banner">
           ⚠ Execution raised {trace.metadata.error.exception_type}: {trace.metadata.error.message}

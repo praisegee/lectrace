@@ -1,4 +1,4 @@
-import type { Trace, Value } from "../../types/trace";
+import type { Trace, Value, StackFrame } from "../../types/trace";
 import { ValueRenderer, shortType } from "../renderers/ValueRenderer";
 import { inSameFunction, isAncestorOf } from "../../hooks/useNavigation";
 
@@ -8,26 +8,87 @@ interface Props {
 }
 
 export function EnvPanel({ trace, stepIndex }: Props) {
+  const step = trace.steps[stepIndex];
+  const stack = step?.stack ?? [];
+
   const env = buildEnv(trace, stepIndex);
-  if (Object.keys(env).length === 0) return null;
+
+  const prevStep = stepIndex > 0 ? trace.steps[stepIndex - 1] : null;
+  const inSameFn = prevStep ? inSameFunction(prevStep.stack, step.stack) : false;
+  const prevEnv = inSameFn ? buildEnv(trace, stepIndex - 1) : {};
+
+  const hasVars = Object.keys(env).length > 0;
+  const showStack = stack.length > 1;
+
+  if (!hasVars && !showStack) return null;
+
+  const currentFn = stack.at(-1)?.function_name;
 
   return (
     <div className="env-panel">
-      <div className="env-header">Variables</div>
-      <table className="env-table">
-        <tbody>
-          {Object.entries(env).map(([name, value]) => (
-            <tr key={name}>
-              <td className="env-key">
-                {name}
-                <span className="env-type">{shortType(value)}</span>
-              </td>
-              <td className="env-eq">=</td>
-              <td className="env-val"><ValueRenderer value={value} /></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {showStack && <CallStack stack={stack} />}
+
+      {hasVars && (
+        <>
+          <div className="env-header">
+            Variables
+            {currentFn && <span className="env-fn-context">in {currentFn}()</span>}
+          </div>
+          <table className="env-table">
+            <tbody>
+              {Object.entries(env).map(([name, value]) => {
+                const isNew = !(name in prevEnv);
+                const isChanged = !isNew &&
+                  JSON.stringify(prevEnv[name]) !== JSON.stringify(value);
+                const status = isNew ? "new" : isChanged ? "changed" : null;
+
+                return (
+                  <tr key={name} className={status ? `env-row--${status}` : ""}>
+                    <td className="env-key">
+                      <span className="env-key-inner">
+                        {status && (
+                          <span
+                            className={`env-dot env-dot--${status}`}
+                            title={status === "new" ? "New variable" : "Value changed"}
+                          />
+                        )}
+                        {name}
+                      </span>
+                      <span className="env-type">{shortType(value)}</span>
+                    </td>
+                    <td className="env-eq">=</td>
+                    <td className="env-val"><ValueRenderer value={value} /></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </>
+      )}
+    </div>
+  );
+}
+
+function CallStack({ stack }: { stack: StackFrame[] }) {
+  return (
+    <div className="call-stack">
+      <div className="env-section-label">Call Stack</div>
+      <div className="call-stack-frames">
+        {stack.map((frame, i) => {
+          const isCurrent = i === stack.length - 1;
+          return (
+            <div key={i} className={`stack-frame${isCurrent ? " stack-frame--current" : ""}`}>
+              <span
+                className="stack-frame-indent"
+                style={{ width: `${i * 12}px`, flexShrink: 0 }}
+              />
+              <span className="stack-frame-arrow">{isCurrent ? "▶" : "·"}</span>
+              <span className="stack-frame-fn">{frame.function_name}</span>
+              <span className="stack-frame-line">:{frame.line_number}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from lectrace import __version__
-from lectrace.directives import parse, inspect_vars, clear_vars, has, STEPOVER, HIDE
+from lectrace.directives import parse, inspect_vars, clear_vars, has, INSPECT, STEPOVER, HIDE
 from lectrace.files import relativize
 from lectrace.renderings import Rendering, flush
 from lectrace.serializer import serialize
@@ -111,6 +111,11 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             ))
         return frames
 
+    # Bare @inspect on a call line: inspect into the called function for that call.
+    # Bare @inspect on a def line: inspect all locals on every call to that function.
+    inspect_call_sites: set[tuple[str, int]] = set()  # (path, line) of bare @inspect call sites
+    inspect_functions: set[int] = set()               # co_firstlineno of marked functions
+
     def on_line(frame, event, arg):
         if frame.f_code.co_filename not in visible:
             return on_line
@@ -143,6 +148,28 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         if _under_stepover(stack, stepovers):
             return on_line
 
+        # @inspect with no args on a call line → inspect all locals in the called function
+        # @inspect with no args on a def line → inspect all locals on every call to that function
+        bare_inspect = has(directives, INSPECT) and not inspect_vars(directives)
+        if bare_inspect:
+            src_line = src_lines[frame.f_lineno - 1].lstrip()
+            if src_line.startswith("def "):
+                # Mark this function by its first line number; co_firstlineno matches this.
+                # Reset bare_inspect so we don't dump all locals at the def site itself.
+                inspect_functions.add(frame.f_lineno)
+                bare_inspect = False
+            else:
+                inspect_call_sites.add((current.path, current.line_number))
+
+        # Inspect all locals if: called from a bare @inspect site, or we're inside a marked function
+        called_from_inspect = (
+            len(stack) >= 2 and
+            (stack[-2].path, stack[-2].line_number) in inspect_call_sites
+        )
+        inside_inspect_fn = frame.f_code.co_firstlineno in inspect_functions
+
+        should_inspect_all = inspect_all or bare_inspect or called_from_inspect or inside_inspect_fn
+
         step = Step(stack=stack, env={})
         if not steps or step.stack != steps[-1].stack:
             steps.append(step)
@@ -152,7 +179,7 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             target = steps[step_index]
 
             frame_locals = frame.f_locals
-            exprs = list(frame_locals.keys()) if inspect_all else inspect_vars(directives)
+            exprs = list(frame_locals.keys()) if should_inspect_all else inspect_vars(directives)
 
             for expr in exprs:
                 parts = expr.split(".", 1)

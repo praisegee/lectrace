@@ -17,14 +17,13 @@ interface Props {
   stepIndex: number;
   rawMode: boolean;
   animateMode: boolean;
-  showNotes: boolean;
   onGotoLine: (ln: number) => void;
   onGotoLocation: (path: string, ln: number) => void;
 }
 
 export function LinesPanel({
   trace, path, lineNumber, stepIndex,
-  rawMode, animateMode, showNotes,
+  rawMode, animateMode,
   onGotoLine, onGotoLocation,
 }: Props) {
   const fileContents = trace.files[path] ?? "";
@@ -60,48 +59,49 @@ export function LinesPanel({
     }
   }, []);
 
+  let prevVisibleLn = 0;
+
   return (
     <div className="lines-panel">
       {highlightedLines.map((htmlLine, idx) => {
         const ln = idx + 1;
         if (!rawMode && hidden.has(ln)) return null;
 
+        const showGap = !rawMode && prevVisibleLn > 0 && ln > prevVisibleLn + 1;
+        prevVisibleLn = ln;
+
         const loc = `${path}:${ln}`;
         const isCurrent = ln === lineNumber;
         const cloaked = animateMode && !linesToShow.has(loc);
-        const allRenderings = lineToRenderings.get(ln) ?? [];
-        const renderings = allRenderings.filter((r) => r.type !== "note");
-        const notes = allRenderings.filter((r): r is Extract<Rendering, { type: "note" }> => r.type === "note");
-
+        const renderings = lineToRenderings.get(ln) ?? [];
         const hasRenderings = !rawMode && renderings.length > 0;
         return (
-          <div
-            key={ln}
-            ref={isCurrent ? scrollRef : null}
-            className={["line", isCurrent ? "current-line" : "", cloaked ? "cloaked" : "", hasRenderings ? "has-renderings" : ""].filter(Boolean).join(" ")}
-          >
-            <span
-              className="line-number"
-              onClick={() => onGotoLine(ln)}
-              title={`Go to line ${ln}`}
+          <div key={ln}>
+            {showGap && <div className="line-gap" />}
+            <div
+              ref={isCurrent ? scrollRef : null}
+              className={["line", isCurrent ? "current-line" : "", cloaked ? "cloaked" : "", hasRenderings ? "has-renderings" : ""].filter(Boolean).join(" ")}
             >
-              {ln}
-            </span>
-            {!rawMode && renderings.length > 0 ? (
-              <div className="renderings">
-                {renderings.map((r, i) => (
-                  <div key={i}>{renderRendering(r, onGotoLocation)}</div>
-                ))}
-              </div>
-            ) : (
               <span
-                className="code-line"
-                dangerouslySetInnerHTML={{ __html: rawMode ? htmlLine : stripDirectives(htmlLine) }}
-              />
-            )}
-            {showNotes && notes.map((r, i) => (
-              <span key={i} className="note-text">{r.data}</span>
-            ))}
+                className="line-number"
+                onClick={() => onGotoLine(ln)}
+                title={`Go to line ${ln}`}
+              >
+                {ln}
+              </span>
+              {hasRenderings ? (
+                <div className="renderings">
+                  {renderings.map((r, i) => (
+                    <div key={i}>{renderRendering(r, onGotoLocation)}</div>
+                  ))}
+                </div>
+              ) : (
+                <span
+                  className="code-line"
+                  dangerouslySetInnerHTML={{ __html: rawMode ? htmlLine : stripDirectives(htmlLine) }}
+                />
+              )}
+            </div>
           </div>
         );
       })}
@@ -132,6 +132,8 @@ function renderRendering(r: Rendering, onGotoLocation: (path: string, ln: number
       return null;
     case "plot":
       return <PlotView spec={r.data} style={r.style} />;
+    case "note":
+      return <div className="note-callout">{r.data}</div>;
     default: {
       const fallback = r as { data?: string; style?: React.CSSProperties };
       return <span style={fallback.style}>{fallback.data}</span>;

@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { TraceIndex } from "../types/trace";
+import { CloseIcon } from "./icons";
 
-export function TraceBrowser() {
+interface Props {
+  open?: boolean;
+  onClose?: () => void;
+}
+
+export function TraceBrowser({ open, onClose }: Props) {
   const [index, setIndex] = useState<TraceIndex | null>(null);
   const [params, setParams] = useSearchParams();
   const active = params.get("trace");
@@ -21,12 +27,19 @@ export function TraceBrowser() {
 
   if (!index || index.traces.length === 0) return null;
 
-  const select = (id: string) =>
+  const select = (id: string) => {
     setParams((p) => { p.set("trace", id); p.delete("step"); return p; });
+    onClose?.();
+  };
 
   return (
-    <nav className="trace-browser">
-      <div className="trace-browser-title">Lectures</div>
+    <nav className={`trace-browser${open ? " drawer-open" : ""}`}>
+      <div className="trace-browser-header">
+        <div className="trace-browser-title">Lectures</div>
+        <button className="drawer-close" onClick={onClose} aria-label="Close">
+          <CloseIcon size={14} />
+        </button>
+      </div>
       <ul>
         {index.traces.map((entry) => (
           <li

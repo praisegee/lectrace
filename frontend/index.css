@@ -20,13 +20,15 @@
   --color-sidebar: #f6f8fa;
   --sidebar-width: 220px;
   --nav-height: 52px;
+  --bottom-nav-height: 56px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 body {
   font-family: var(--font-ui);
   color: var(--color-text);
   background: var(--color-bg);
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -36,16 +38,16 @@ body.resizing {
 }
 
 #root {
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
-/* Layout */
+/* ─── App layout ─── */
 
 .app-layout {
   display: flex;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -57,7 +59,7 @@ body.resizing {
   min-width: 0;
 }
 
-/* Sidebar */
+/* ─── Sidebar / TraceBrowser ─── */
 
 .trace-browser {
   width: var(--sidebar-width);
@@ -65,7 +67,25 @@ body.resizing {
   background: var(--color-sidebar);
   border-right: 1px solid var(--color-border);
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.22s ease;
+}
+
+/* Desktop sidebar collapse */
+.sidebar-collapsed .trace-browser {
+  width: 0;
+  padding: 0;
+  border-right: none;
+}
+
+.trace-browser-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px 8px;
 }
 
 .trace-browser-title {
@@ -74,11 +94,27 @@ body.resizing {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-muted);
-  padding: 0 12px 8px;
+}
+
+.drawer-close {
+  display: none; /* visible only on mobile */
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-muted);
+  padding: 4px;
+  line-height: 0;
+  border-radius: 4px;
+}
+
+.drawer-close:hover {
+  background: var(--color-border);
+  color: var(--color-text);
 }
 
 .trace-browser ul {
   list-style: none;
+  flex: 1;
 }
 
 .trace-browser li {
@@ -100,7 +136,7 @@ body.resizing {
 }
 
 .entry-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -108,12 +144,18 @@ body.resizing {
 }
 
 .entry-steps {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-muted);
   margin-top: 2px;
 }
 
-/* Viewer layout */
+/* ─── Drawer backdrop (mobile only) ─── */
+
+.drawer-backdrop {
+  display: none;
+}
+
+/* ─── Viewer layout ─── */
 
 .viewer-layout {
   display: flex;
@@ -131,6 +173,7 @@ body.resizing {
 .viewer-code {
   flex: 1;
   overflow-y: auto;
+  overflow-x: auto;
   min-width: 0;
   padding: 8px 0 60px;
 }
@@ -150,7 +193,7 @@ body.resizing {
   background: var(--color-accent);
 }
 
-/* Env panel wrapper (docked right column) */
+/* Env panel wrapper */
 
 .env-wrapper {
   flex-shrink: 0;
@@ -160,7 +203,17 @@ body.resizing {
   padding: 12px 10px;
 }
 
-/* Navigation bar */
+/* Mobile env accordion header (hidden on desktop) */
+
+.mobile-env-header {
+  display: none;
+}
+
+.env-panel-wrap {
+  overflow: auto;
+}
+
+/* ─── Navigation bar ─── */
 
 .nav-bar {
   background: var(--color-surface);
@@ -172,10 +225,46 @@ body.resizing {
 .nav-bar-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-height: 36px;
 }
 
+/* Hamburger — always visible, toggles sidebar on desktop, opens drawer on mobile */
+.nav-hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--color-muted);
+  line-height: 0;
+  flex-shrink: 0;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.nav-hamburger:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+/* Lecture title — mobile only */
+.nav-title {
+  display: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+/* File path — desktop only */
 .nav-path {
   font-family: var(--font-code);
   font-size: 12px;
@@ -188,7 +277,7 @@ body.resizing {
 }
 
 .nav-counter {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -214,6 +303,8 @@ body.resizing {
   align-items: center;
   justify-content: center;
   transition: background 0.1s, border-color 0.1s, color 0.1s;
+  min-width: 32px;
+  min-height: 32px;
 }
 
 .nav-buttons button:hover {
@@ -235,6 +326,11 @@ body.resizing {
   margin: 0 4px;
 }
 
+/* Step group — desktop only (moves to bottom nav on mobile) */
+.nav-step-group {
+  display: contents;
+}
+
 .progress-bar {
   height: 3px;
   background: var(--color-border);
@@ -249,14 +345,20 @@ body.resizing {
   transition: width 0.15s ease-out;
 }
 
-/* Code lines */
+/* ─── Mobile bottom nav ─── */
+
+.mobile-bottom-nav {
+  display: none; /* shown on mobile only */
+}
+
+/* ─── Code lines ─── */
 
 .lines-panel {
   font-family: var(--font-code);
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.65;
   padding: 8px 0;
-  max-width: 860px;
+  max-width: 900px;
 }
 
 .line {
@@ -277,7 +379,6 @@ body.resizing {
   opacity: 0.15;
 }
 
-/* Lines that show rendered content get more vertical breathing room */
 .line.has-renderings {
   padding-top: 8px;
   padding-bottom: 8px;
@@ -292,7 +393,7 @@ body.resizing {
   flex-shrink: 0;
   cursor: pointer;
   user-select: none;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .line-number:hover {
@@ -302,6 +403,20 @@ body.resizing {
 .code-line {
   flex: 1;
   white-space: pre;
+  overflow-x: auto;
+}
+
+.line-gap {
+  height: 1px;
+  margin: 3px 0 3px 3.5em;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-muted) 0,
+    var(--color-muted) 3px,
+    transparent 3px,
+    transparent 8px
+  );
+  opacity: 0.3;
 }
 
 .renderings {
@@ -313,20 +428,88 @@ body.resizing {
   min-width: 0;
 }
 
-.note-text {
-  display: block;
-  width: 100%;
-  padding-left: 3.5em;
-  font-size: 11px;
+.note-callout {
+  padding: 8px 12px;
+  border-left: 3px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border-radius: 0 4px 4px 0;
+  font-size: 14px;
   font-style: italic;
   color: var(--color-muted);
   font-family: var(--font-ui);
+  line-height: 1.55;
 }
 
-/* Environment panel */
+/* ─── Environment panel ─── */
+
+/* Shared label style used by call stack and variables header */
+.env-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-muted);
+  margin-bottom: 6px;
+}
+
+/* Call stack */
+
+.call-stack {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.call-stack-frames {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stack-frame {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-code);
+  font-size: 12.5px;
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+.stack-frame--current {
+  color: var(--color-text);
+}
+
+.stack-frame-arrow {
+  font-size: 10px;
+  width: 12px;
+  flex-shrink: 0;
+  color: var(--color-muted);
+}
+
+.stack-frame--current .stack-frame-arrow {
+  color: var(--color-accent);
+}
+
+.stack-frame-fn {
+  font-weight: 500;
+  color: inherit;
+}
+
+.stack-frame--current .stack-frame-fn {
+  color: var(--color-accent);
+}
+
+.stack-frame-line {
+  font-size: 11px;
+  color: var(--color-muted);
+  opacity: 0.7;
+}
+
+/* Variables header */
 
 .env-header {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -334,7 +517,49 @@ body.resizing {
   padding-bottom: 8px;
   margin-bottom: 4px;
   border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
 }
+
+.env-fn-context {
+  font-weight: 400;
+  font-size: 11px;
+  font-family: var(--font-code);
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--color-accent);
+  opacity: 0.8;
+}
+
+/* Change indicators */
+
+.env-row--new td {
+  background: color-mix(in srgb, #2da44e 7%, transparent);
+  transition: background 0.4s ease;
+}
+
+.env-row--changed td {
+  background: color-mix(in srgb, #e6a700 10%, transparent);
+  transition: background 0.4s ease;
+}
+
+.env-key-inner {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.env-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.env-dot--new     { background: #2da44e; }
+.env-dot--changed { background: #d97706; }
 
 .env-panel {
   font-family: var(--font-code);
@@ -343,7 +568,7 @@ body.resizing {
 .env-table {
   border-collapse: collapse;
   font-family: var(--font-code);
-  font-size: 12px;
+  font-size: 13.5px;
   width: 100%;
 }
 
@@ -366,7 +591,7 @@ body.resizing {
 .env-type {
   display: block;
   font-weight: 400;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--color-muted);
   margin-top: 1px;
   font-family: var(--font-code);
@@ -381,7 +606,7 @@ body.resizing {
   max-width: 100%;
 }
 
-/* Matrices / tensors */
+/* ─── Matrices / tensors ─── */
 
 .tensor-wrap {
   display: inline-flex;
@@ -390,7 +615,7 @@ body.resizing {
 }
 
 .tensor-label {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--color-muted);
   font-family: var(--font-code);
 }
@@ -401,10 +626,10 @@ body.resizing {
 }
 
 .matrix td {
-  padding: 1px 6px;
+  padding: 2px 8px;
   text-align: right;
-  font-size: 11.5px;
-  min-width: 2.2em;
+  font-size: 13px;
+  min-width: 2.4em;
   font-variant-numeric: tabular-nums;
 }
 
@@ -415,7 +640,7 @@ body.resizing {
 .matrix-ellipsis {
   text-align: center;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: 13px;
   padding: 0 !important;
 }
 
@@ -426,7 +651,7 @@ body.resizing {
 
 .dict td {
   padding: 1px 4px;
-  font-size: 12px;
+  font-size: 13.5px;
   vertical-align: top;
 }
 
@@ -441,7 +666,7 @@ body.resizing {
   padding: 0 2px !important;
 }
 
-/* Collapsible values */
+/* ─── Collapsible values ─── */
 
 .value-root {
   display: inline-block;
@@ -453,7 +678,7 @@ body.resizing {
   border: none;
   cursor: pointer;
   font-family: var(--font-code);
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--color-muted);
   padding: 0;
   line-height: 1.4;
@@ -465,7 +690,7 @@ body.resizing {
 
 .value-collapsible {
   color: var(--color-text);
-  font-size: 11.5px;
+  font-size: 13px;
 }
 
 .value-collapsible:hover {
@@ -477,7 +702,7 @@ body.resizing {
   border-radius: 3px;
   padding: 0 4px;
   color: var(--color-accent);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .value-more:hover {
@@ -492,7 +717,7 @@ body.resizing {
 
 .value-list-inline {
   font-family: var(--font-code);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .value-sep {
@@ -506,20 +731,20 @@ body.resizing {
 
 .value-list-table td {
   padding: 1px 6px 1px 0;
-  font-size: 12px;
+  font-size: 13.5px;
   vertical-align: top;
 }
 
 .list-index {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: 11px;
   padding-right: 6px !important;
   user-select: none;
   text-align: right;
   min-width: 1.4em;
 }
 
-/* Value type colours */
+/* ─── Value type colours ─── */
 
 .value-num  { color: #0550ae; }
 .value-bool { color: #8250df; }
@@ -527,10 +752,10 @@ body.resizing {
 .value-str  { color: #0a3069; }
 .value-sympy { color: #8250df; font-style: italic; }
 .value-empty { color: var(--color-muted); }
-.value-muted { color: var(--color-muted); font-size: 11px; }
-.value-unknown { color: var(--color-error); font-size: 11px; }
+.value-muted { color: var(--color-muted); font-size: 12px; }
+.value-unknown { color: var(--color-error); font-size: 12px; }
 
-/* External link cards */
+/* ─── External link cards ─── */
 
 .link-card-wrapper {
   position: relative;
@@ -584,13 +809,7 @@ body.resizing {
   flex-direction: column;
 }
 
-/* Value types */
-
-.value-str { color: #0a3069; }
-.value-sympy { color: #8250df; font-style: italic; }
-.value-unknown { color: var(--color-error); font-size: 11px; }
-
-/* Status messages */
+/* ─── Status messages ─── */
 
 .status-msg {
   padding: 40px;
@@ -623,7 +842,7 @@ body.resizing {
   z-index: 300;
 }
 
-/* Trace prompt (empty state) */
+/* ─── Empty state prompt ─── */
 
 .trace-prompt {
   padding: 60px 40px;
@@ -676,12 +895,12 @@ body.resizing {
   background: #0860c4;
 }
 
-/* Markdown rendered content */
+/* ─── Markdown rendered content ─── */
 
 .markdown-content {
   font-family: var(--font-ui);
-  font-size: 13.5px;
-  line-height: 1.65;
+  font-size: 16px;
+  line-height: 1.7;
   color: var(--color-text);
 }
 
@@ -733,7 +952,241 @@ body.resizing {
   overflow-x: auto;
 }
 
-/* Fullscreen — hide sidebar, give code maximum space */
+/* ─── Fullscreen: hide sidebar, give code maximum space ─── */
 
 :fullscreen .trace-browser { display: none; }
 :-webkit-full-screen .trace-browser { display: none; }
+:fullscreen .mobile-bottom-nav { display: none; }
+
+/* ─── Mobile responsive (≤ 640px) ─── */
+
+@media (max-width: 640px) {
+  /* Sidebar becomes a fixed slide-in drawer (sidebar-collapsed doesn't apply on mobile) */
+  .trace-browser,
+  .sidebar-collapsed .trace-browser {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 80%;
+    max-width: 280px;
+    z-index: 500;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
+    border-right: none;
+    padding: 12px 0;
+  }
+
+  .trace-browser.drawer-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+  }
+
+  /* Drawer close button visible on mobile */
+  .drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Semi-transparent backdrop behind drawer */
+  .drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 499;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Show lecture title, hide file path */
+  .nav-title { display: block; }
+  .nav-path  { display: none; }
+
+  /* Hide desktop-only sep and step group */
+  .nav-desktop-sep { display: none; }
+  .nav-step-group  { display: none; }
+
+  /* Smaller toggles in top nav */
+  .nav-btn-animate,
+  .nav-btn-raw { display: none; }
+
+  /* Stack env panel below code */
+  .viewer-body { flex-direction: column; }
+
+  /* Hide desktop resize handle */
+  .viewer-resize-handle { display: none; }
+
+  /* Env wrapper: full width below code */
+  .env-wrapper {
+    width: 100% !important;
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+    padding: 0;
+    overflow: visible;
+    flex-shrink: 0;
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+
+  /* Show mobile accordion header */
+  .mobile-env-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .mobile-env-header:active {
+    background: var(--color-border);
+  }
+
+  .env-panel-wrap {
+    padding: 10px 14px;
+  }
+
+  .env-panel-wrap--closed {
+    display: none;
+  }
+
+  /* Extra bottom padding for the fixed bottom nav */
+  .viewer-code {
+    padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px);
+  }
+
+  /* Fixed bottom navigation bar */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(var(--bottom-nav-height) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+    align-items: stretch;
+    justify-content: space-around;
+  }
+
+  .mobile-bottom-nav button {
+    flex: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    min-height: 44px;
+    transition: color 0.12s, background 0.12s;
+    position: relative;
+  }
+
+  /* Make step forward button slightly more prominent */
+  .mobile-step-primary {
+    color: var(--color-accent);
+  }
+
+  .mobile-bottom-nav button:active {
+    background: var(--color-surface);
+    color: var(--color-accent);
+  }
+
+  /* Tap ripple effect */
+  .mobile-bottom-nav button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--color-accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .mobile-bottom-nav button:active::after {
+    opacity: 0.08;
+  }
+
+  /* Error banner: above bottom nav */
+  .trace-error-banner {
+    bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 12px);
+    right: 12px;
+    left: 12px;
+    max-width: none;
+  }
+
+  /* Code font on phones — readable but fits more */
+  .lines-panel {
+    font-size: 13px;
+    max-width: none;
+  }
+
+  .line-number {
+    width: 2.8em;
+    padding-right: 10px;
+    font-size: 12px;
+  }
+
+  /* Code horizontal scroll instead of wrap */
+  .code-line {
+    white-space: pre;
+    overflow: visible;
+  }
+
+  /* Markdown on mobile */
+  .markdown-content {
+    font-size: 15px;
+  }
+
+  .markdown-content h1 { font-size: 1.35em; }
+  .markdown-content h2 { font-size: 1.15em; }
+
+  /* Matrix: slightly smaller cells on mobile */
+  .matrix td {
+    padding: 1px 5px;
+    font-size: 12px;
+    min-width: 2em;
+  }
+
+  /* Link hover panels: tap-friendly on mobile */
+  .link-hover-panel {
+    width: calc(100vw - 24px);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/* ─── Tablet (641px – 1024px): sidebar collapses by default ─── */
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  :root {
+    --sidebar-width: 190px;
+  }
+
+  .lines-panel {
+    max-width: none;
+  }
+}
