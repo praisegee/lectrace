@@ -402,8 +402,8 @@ body.resizing {
 
 .code-line {
   flex: 1;
-  white-space: pre;
-  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .line-gap {
@@ -1150,9 +1150,9 @@ body.resizing {
     font-size: 12px;
   }
 
-  /* Code horizontal scroll instead of wrap */
   .code-line {
-    white-space: pre;
+    white-space: pre-wrap;
+    word-break: break-word;
     overflow: visible;
   }
 
