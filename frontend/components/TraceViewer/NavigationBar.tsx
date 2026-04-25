@@ -40,7 +40,7 @@ export function NavigationBar({
       <div className="nav-bar-row">
         {/* Mobile: hamburger to open lecture drawer */}
         <button className="nav-hamburger" onClick={onToggleSidebar} aria-label="Toggle sidebar">
-          <SidebarIcon size={16} />
+          <SidebarIcon size={19} />
         </button>
 
         {/* Mobile: lecture title */}

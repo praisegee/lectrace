@@ -16,19 +16,19 @@ export function MobileBottomNav({
   return (
     <div className="mobile-bottom-nav">
       <button onClick={onStepOverBackward} aria-label="Step over backward">
-        <SkipBackIcon size={20} />
+        <SkipBackIcon size={24} />
       </button>
       <button onClick={onStepBackward} aria-label="Step backward">
-        <StepBackIcon size={20} />
+        <StepBackIcon size={24} />
       </button>
       <button onClick={onStepForward} aria-label="Step forward" className="mobile-step-primary">
-        <StepFwdIcon size={20} />
+        <StepFwdIcon size={24} />
       </button>
       <button onClick={onStepOverForward} aria-label="Step over forward">
-        <SkipFwdIcon size={20} />
+        <SkipFwdIcon size={24} />
       </button>
       <button onClick={onStepUp} aria-label="Step out of function">
-        <StepOutIcon size={20} />
+        <StepOutIcon size={24} />
       </button>
     </div>
   );

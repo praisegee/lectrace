@@ -18,9 +18,9 @@
   --color-progress: #2da44e;
   --color-error: #cf222e;
   --color-sidebar: #f6f8fa;
-  --sidebar-width: 220px;
-  --nav-height: 52px;
-  --bottom-nav-height: 56px;
+  --sidebar-width: 264px;
+  --nav-height: 62px;
+  --bottom-nav-height: 67px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -89,7 +89,7 @@ body.resizing {
 }
 
 .trace-browser-title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -136,7 +136,7 @@ body.resizing {
 }
 
 .entry-title {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -144,7 +144,7 @@ body.resizing {
 }
 
 .entry-steps {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-muted);
   margin-top: 2px;
 }
@@ -226,7 +226,7 @@ body.resizing {
   display: flex;
   align-items: center;
   gap: 6px;
-  min-height: 36px;
+  min-height: 43px;
 }
 
 /* Hamburger — always visible, toggles sidebar on desktop, opens drawer on mobile */
@@ -242,8 +242,8 @@ body.resizing {
   color: var(--color-muted);
   line-height: 0;
   flex-shrink: 0;
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 38px;
+  min-height: 38px;
 }
 
 .nav-hamburger:hover {
@@ -254,7 +254,7 @@ body.resizing {
 /* Lecture title — mobile only */
 .nav-title {
   display: none;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--color-text);
   white-space: nowrap;
@@ -267,7 +267,7 @@ body.resizing {
 /* File path — desktop only */
 .nav-path {
   font-family: var(--font-code);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -277,7 +277,7 @@ body.resizing {
 }
 
 .nav-counter {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--color-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -303,8 +303,8 @@ body.resizing {
   align-items: center;
   justify-content: center;
   transition: background 0.1s, border-color 0.1s, color 0.1s;
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 38px;
+  min-height: 38px;
 }
 
 .nav-buttons button:hover {
@@ -355,10 +355,10 @@ body.resizing {
 
 .lines-panel {
   font-family: var(--font-code);
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1.65;
   padding: 8px 0;
-  max-width: 900px;
+  max-width: 1080px;
 }
 
 .line {
@@ -366,7 +366,7 @@ body.resizing {
   align-items: baseline;
   flex-wrap: wrap;
   padding: 1px 12px 1px 0;
-  min-height: 21px;
+  min-height: 25px;
   transition: background 0.1s;
 }
 
@@ -393,7 +393,7 @@ body.resizing {
   flex-shrink: 0;
   cursor: pointer;
   user-select: none;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .line-number:hover {
@@ -433,7 +433,7 @@ body.resizing {
   border-left: 3px solid var(--color-accent);
   background: color-mix(in srgb, var(--color-accent) 8%, transparent);
   border-radius: 0 4px 4px 0;
-  font-size: 14px;
+  font-size: 17px;
   font-style: italic;
   color: var(--color-muted);
   font-family: var(--font-ui);
@@ -444,7 +444,7 @@ body.resizing {
 
 /* Shared label style used by call stack and variables header */
 .env-section-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -471,7 +471,7 @@ body.resizing {
   align-items: center;
   gap: 4px;
   font-family: var(--font-code);
-  font-size: 12.5px;
+  font-size: 15px;
   color: var(--color-muted);
   line-height: 1.4;
 }
@@ -481,7 +481,7 @@ body.resizing {
 }
 
 .stack-frame-arrow {
-  font-size: 10px;
+  font-size: 12px;
   width: 12px;
   flex-shrink: 0;
   color: var(--color-muted);
@@ -501,7 +501,7 @@ body.resizing {
 }
 
 .stack-frame-line {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--color-muted);
   opacity: 0.7;
 }
@@ -509,7 +509,7 @@ body.resizing {
 /* Variables header */
 
 .env-header {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -524,7 +524,7 @@ body.resizing {
 
 .env-fn-context {
   font-weight: 400;
-  font-size: 11px;
+  font-size: 13px;
   font-family: var(--font-code);
   text-transform: none;
   letter-spacing: 0;
@@ -568,7 +568,7 @@ body.resizing {
 .env-table {
   border-collapse: collapse;
   font-family: var(--font-code);
-  font-size: 13.5px;
+  font-size: 16px;
   width: 100%;
 }
 
@@ -591,7 +591,7 @@ body.resizing {
 .env-type {
   display: block;
   font-weight: 400;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--color-muted);
   margin-top: 1px;
   font-family: var(--font-code);
@@ -615,7 +615,7 @@ body.resizing {
 }
 
 .tensor-label {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--color-muted);
   font-family: var(--font-code);
 }
@@ -628,7 +628,7 @@ body.resizing {
 .matrix td {
   padding: 2px 8px;
   text-align: right;
-  font-size: 13px;
+  font-size: 16px;
   min-width: 2.4em;
   font-variant-numeric: tabular-nums;
 }
@@ -640,7 +640,7 @@ body.resizing {
 .matrix-ellipsis {
   text-align: center;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: 16px;
   padding: 0 !important;
 }
 
@@ -651,7 +651,7 @@ body.resizing {
 
 .dict td {
   padding: 1px 4px;
-  font-size: 13.5px;
+  font-size: 16px;
   vertical-align: top;
 }
 
@@ -678,7 +678,7 @@ body.resizing {
   border: none;
   cursor: pointer;
   font-family: var(--font-code);
-  font-size: 13px;
+  font-size: 16px;
   color: var(--color-muted);
   padding: 0;
   line-height: 1.4;
@@ -690,7 +690,7 @@ body.resizing {
 
 .value-collapsible {
   color: var(--color-text);
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .value-collapsible:hover {
@@ -702,7 +702,7 @@ body.resizing {
   border-radius: 3px;
   padding: 0 4px;
   color: var(--color-accent);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .value-more:hover {
@@ -717,7 +717,7 @@ body.resizing {
 
 .value-list-inline {
   font-family: var(--font-code);
-  font-size: 13.5px;
+  font-size: 16px;
 }
 
 .value-sep {
@@ -731,13 +731,13 @@ body.resizing {
 
 .value-list-table td {
   padding: 1px 6px 1px 0;
-  font-size: 13.5px;
+  font-size: 16px;
   vertical-align: top;
 }
 
 .list-index {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: 13px;
   padding-right: 6px !important;
   user-select: none;
   text-align: right;
@@ -752,8 +752,8 @@ body.resizing {
 .value-str  { color: #0a3069; }
 .value-sympy { color: #8250df; font-style: italic; }
 .value-empty { color: var(--color-muted); }
-.value-muted { color: var(--color-muted); font-size: 12px; }
-.value-unknown { color: var(--color-error); font-size: 12px; }
+.value-muted { color: var(--color-muted); font-size: 14px; }
+.value-unknown { color: var(--color-error); font-size: 14px; }
 
 /* ─── External link cards ─── */
 
@@ -782,10 +782,10 @@ body.resizing {
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   padding: 10px 14px;
-  width: 480px;
+  width: 576px;
   max-width: 90vw;
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .link-card-wrapper:hover .link-hover-panel {
@@ -801,7 +801,7 @@ body.resizing {
 
 .link-authors, .link-date, .link-description, .link-notes {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .link-notes {
@@ -815,7 +815,7 @@ body.resizing {
   padding: 40px;
   text-align: center;
   color: var(--color-muted);
-  font-size: 16px;
+  font-size: 19px;
 }
 
 .error-msg {
@@ -836,7 +836,7 @@ body.resizing {
   border: 1px solid #d4a72c;
   border-radius: 6px;
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: 16px;
   color: #633d00;
   max-width: 500px;
   z-index: 300;
@@ -850,7 +850,7 @@ body.resizing {
 }
 
 .trace-prompt h2 {
-  font-size: 20px;
+  font-size: 24px;
   margin-bottom: 8px;
 }
 
@@ -867,7 +867,7 @@ body.resizing {
 .trace-input {
   flex: 1;
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: 17px;
   border: 1px solid var(--color-border);
   border-radius: 6px;
   outline: none;
@@ -882,7 +882,7 @@ body.resizing {
 .trace-prompt button,
 .nav-buttons button[type="submit"] {
   padding: 8px 16px;
-  font-size: 14px;
+  font-size: 17px;
   background: var(--color-accent);
   color: white;
   border: none;
@@ -899,7 +899,7 @@ body.resizing {
 
 .markdown-content {
   font-family: var(--font-ui);
-  font-size: 16px;
+  font-size: 19px;
   line-height: 1.7;
   color: var(--color-text);
 }
@@ -1043,7 +1043,7 @@ body.resizing {
     padding: 10px 14px;
     cursor: pointer;
     user-select: none;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -1098,8 +1098,8 @@ body.resizing {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    min-height: 44px;
+    font-size: 22px;
+    min-height: 53px;
     transition: color 0.12s, background 0.12s;
     position: relative;
   }
@@ -1140,14 +1140,14 @@ body.resizing {
 
   /* Code font on phones — readable but fits more */
   .lines-panel {
-    font-size: 13px;
+    font-size: 16px;
     max-width: none;
   }
 
   .line-number {
     width: 2.8em;
     padding-right: 10px;
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .code-line {
@@ -1158,7 +1158,7 @@ body.resizing {
 
   /* Markdown on mobile */
   .markdown-content {
-    font-size: 15px;
+    font-size: 18px;
   }
 
   .markdown-content h1 { font-size: 1.35em; }
@@ -1167,7 +1167,7 @@ body.resizing {
   /* Matrix: slightly smaller cells on mobile */
   .matrix td {
     padding: 1px 5px;
-    font-size: 12px;
+    font-size: 14px;
     min-width: 2em;
   }
 
@@ -1183,7 +1183,7 @@ body.resizing {
 
 @media (min-width: 641px) and (max-width: 1024px) {
   :root {
-    --sidebar-width: 190px;
+    --sidebar-width: 228px;
   }
 
   .lines-panel {

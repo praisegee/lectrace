@@ -187,7 +187,7 @@ export function TraceViewer({ onToggleSidebar }: Props) {
                 aria-expanded={mobileEnvOpen}
               >
                 <span>Variables {envVarCount > 0 ? `(${envVarCount})` : ""}</span>
-                {mobileEnvOpen ? <ChevronUpIcon size={13} /> : <ChevronDownIcon size={13} />}
+                {mobileEnvOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
               </div>
               <div className={`env-panel-wrap${mobileEnvOpen ? "" : " env-panel-wrap--closed"}`}>
                 <EnvPanel trace={trace} stepIndex={stepIndex} />

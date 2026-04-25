@@ -3,7 +3,7 @@ interface SvgProps {
   children: React.ReactNode;
 }
 
-function Svg({ size = 15, children }: SvgProps) {
+function Svg({ size = 18, children }: SvgProps) {
   return (
     <svg
       width={size} height={size} viewBox="0 0 16 16"

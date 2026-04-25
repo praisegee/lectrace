@@ -37,7 +37,7 @@ export function TraceBrowser({ open, onClose }: Props) {
       <div className="trace-browser-header">
         <div className="trace-browser-title">Lectures</div>
         <button className="drawer-close" onClick={onClose} aria-label="Close">
-          <CloseIcon size={14} />
+          <CloseIcon size={17} />
         </button>
       </div>
       <ul>
