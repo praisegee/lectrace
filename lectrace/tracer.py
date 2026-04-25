@@ -98,6 +98,15 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
     sys.modules["_lecture"] = module
     visible.add(str(source.resolve()))
 
+    # Statically detect functions marked with bare @inspect on their def line.
+    # We do this before tracing so module-level execution doesn't need to be traced at all.
+    inspect_functions: set[int] = set()
+    for i, line in enumerate(src_lines, start=1):
+        directives = parse(line)
+        if has(directives, INSPECT) and not inspect_vars(directives):
+            if line.lstrip().startswith("def "):
+                inspect_functions.add(i)
+
     def build_stack() -> list[StackFrame]:
         frames = []
         for fi in tb.extract_stack():
@@ -111,10 +120,8 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             ))
         return frames
 
-    # Bare @inspect on a call line: inspect into the called function for that call.
-    # Bare @inspect on a def line: inspect all locals on every call to that function.
-    inspect_call_sites: set[tuple[str, int]] = set()  # (path, line) of bare @inspect call sites
-    inspect_functions: set[int] = set()               # co_firstlineno of marked functions
+    # (path, line) of bare @inspect call sites — propagates inspection one level into called fn
+    inspect_call_sites: set[tuple[str, int]] = set()
 
     def on_line(frame, event, arg):
         if frame.f_code.co_filename not in visible:
@@ -148,20 +155,15 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         if _under_stepover(stack, stepovers):
             return on_line
 
-        # @inspect with no args on a call line → inspect all locals in the called function
-        # @inspect with no args on a def line → inspect all locals on every call to that function
+        # Bare @inspect on a non-def line: inspect all locals here and in any direct call.
+        # Bare @inspect on a def line: already handled statically via inspect_functions.
         bare_inspect = has(directives, INSPECT) and not inspect_vars(directives)
         if bare_inspect:
-            src_line = src_lines[frame.f_lineno - 1].lstrip()
-            if src_line.startswith("def "):
-                # Mark this function by its first line number; co_firstlineno matches this.
-                # Reset bare_inspect so we don't dump all locals at the def site itself.
-                inspect_functions.add(frame.f_lineno)
-                bare_inspect = False
+            if src_lines[frame.f_lineno - 1].lstrip().startswith("def "):
+                bare_inspect = False  # inside_inspect_fn handles this; don't dump all locals here
             else:
                 inspect_call_sites.add((current.path, current.line_number))
 
-        # Inspect all locals if: called from a bare @inspect site, or we're inside a marked function
         called_from_inspect = (
             len(stack) >= 2 and
             (stack[-2].path, stack[-2].line_number) in inspect_call_sites
@@ -203,11 +205,10 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
 
         return after_line
 
-    sys.settrace(on_line)
+    # Load the module WITHOUT tracing — this only defines functions and runs imports.
+    # Tracing starts when main() is called, so every step the viewer shows is inside a function.
     try:
         spec.loader.exec_module(module)  # type: ignore[union-attr]
-        if hasattr(module, "main"):
-            module.main()
     except Exception as exc:
         error = TraceError(
             exception_type=type(exc).__name__,
@@ -215,10 +216,25 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             traceback=tb.format_exc(),
         )
         if error.exception_type != "SystemExit":
-            print(f"\nExecution error: {error.exception_type}: {error.message}")
-    finally:
-        sys.settrace(None)
-        sys.modules.pop("_lecture", None)
+            print(f"\nModule load error: {error.exception_type}: {error.message}")
+
+    if error is None:
+        sys.settrace(on_line)
+        try:
+            if hasattr(module, "main"):
+                module.main()
+        except Exception as exc:
+            error = TraceError(
+                exception_type=type(exc).__name__,
+                message=str(exc),
+                traceback=tb.format_exc(),
+            )
+            if error.exception_type != "SystemExit":
+                print(f"\nExecution error: {error.exception_type}: {error.message}")
+        finally:
+            sys.settrace(None)
+
+    sys.modules.pop("_lecture", None)
 
     files = {relativize(source.resolve()): src_text}
     hidden = _hidden_lines(files)
