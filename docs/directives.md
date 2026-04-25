@@ -26,6 +26,14 @@ node = Node(val=5)    # @inspect node.val node.left
 
 The variable panel accumulates values as you step forward — once a variable appears it stays visible until cleared with `@clear`.
 
+**Inside helper functions:** you do not need `@inspect` at all. When the viewer steps into any called function, all local variables are shown automatically. `@inspect` is only needed in `main()` to select which variables to highlight.
+
+**Bare `@inspect` in `main()`:** omit the variable names to show all locals at that point:
+
+```python
+result = compute()   # @inspect   ← shows everything in scope here
+```
+
 ---
 
 ## @clear
@@ -44,20 +52,20 @@ Use it to keep the panel tidy — scaffolding variables that were only relevant 
 
 ## @stepover
 
-Skip into the body of a function call — trace over it as a single step rather than entering it.
+Skip the body of a function call — trace over it as a single step rather than entering it.
 
 ```python
 def sort(arr):       # called many times — noise in the viewer
     ...
 
 data = [3, 1, 4]
-data = sort(data)    # @stepover  ← one step, no recursion shown
+data = sort(data)    # @stepover  ← one step, no internals shown
 ```
 
 This is especially useful for utility functions, recursive helpers, or library calls that students don't need to follow line by line.
 
 !!! note
-    `@stepover` marks the line where the call is made. Everything the call does internally is invisible to the viewer — the step jumps from the call site directly to after it returns.
+    `@stepover` marks the line where the call is made. Everything the call does internally is invisible to the viewer — the step jumps from the call site directly to after the return.
 
 ---
 

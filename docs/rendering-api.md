@@ -182,7 +182,7 @@ plot(spec: object) -> None
 
 ## note()
 
-Add a presenter annotation that appears beside the line when Notes mode is active (`N` key).
+Add a presenter annotation rendered as a styled callout beside the line.
 
 ```python
 values = [5, 3, 7, 1]  # @inspect values
@@ -196,7 +196,7 @@ note("""
 """)
 ```
 
-Notes are hidden by default. They're intended for presenter context that would be distracting when students browse the lecture on their own. Like `text()`, triple-quoted strings are dedented automatically.
+Notes appear inline as callout boxes with a left accent border. Use them for speaker context, questions to pose to the audience, or caveats that would be distracting as main text. Like `text()`, triple-quoted strings are dedented automatically.
 
 **Signature:**
 

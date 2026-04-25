@@ -1,6 +1,6 @@
 # Keyboard Shortcuts
 
-All shortcuts work while the viewer is focused.
+All shortcuts work while the viewer is focused on desktop.
 
 ## Navigation
 
@@ -10,7 +10,7 @@ All shortcuts work while the viewer is focused.
 | `←` or `h` | Step backward one line |
 | `Shift+→` or `j` | Step over forward — advance without descending into function calls |
 | `Shift+←` or `k` | Step over backward |
-| `u` | Step up — exit the current function and return to the caller |
+| `u` | Step out of current function, return to the caller |
 
 Click any line number to jump directly to the first step on that line.
 
@@ -20,10 +20,20 @@ Click any line number to jump directly to the first step on that line.
 
 | Key | Toggles |
 |-----|---------|
-| `A` | **Animation mode** — progressively reveals code lines as you step forward. Lines not yet reached are hidden. On by default. |
-| `E` | **Variable panel** — shows/hides the floating env panel with inspected variables. On by default. |
-| `N` | **Notes** — shows/hides `note()` annotations beside their lines. Off by default. |
-| `R` | **Raw mode** — shows the original source code instead of rendered markdown/images. Useful for inspecting or copying code. |
+| `A` | **Animation mode** — progressively reveals code lines as you step forward. Lines not yet reached are dimmed. |
+| `E` | **Variable panel** — shows/hides the variable panel. |
+| `R` | **Raw mode** — shows the original source code instead of rendered markdown and images. Useful for copying code. |
+| `F` | **Fullscreen** — enters/exits fullscreen presentation mode. |
+
+---
+
+## Mobile
+
+On mobile there are no keyboard shortcuts. Use:
+
+- **Swipe left/right** to step forward/backward
+- **Bottom navigation bar** for all step controls (forward, backward, step over, step out)
+- **Variables bar** — tap to expand/collapse the variable panel
 
 ---
 
@@ -45,7 +55,7 @@ result = sort(data)   # @stepover
 
 The `h`/`l`/`j`/`k` bindings follow vim conventions:
 
-- `h` ← (left)
-- `l` → (right)
+- `h` ← step backward
+- `l` → step forward
 - `j` step over forward
 - `k` step over backward
