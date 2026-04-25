@@ -50,8 +50,8 @@ export function TraceViewer({ onToggleSidebar }: Props) {
   }, []);
 
   // Resizable env panel (desktop)
-  const [envWidth, setEnvWidth] = useState(280);
-  const resizeRef = useRef({ active: false, startX: 0, startW: 280 });
+  const [envWidth, setEnvWidth] = useState(380);
+  const resizeRef = useRef({ active: false, startX: 0, startW: 380 });
   const [mobileEnvOpen, setMobileEnvOpen] = useState(false);
 
   const onResizeStart = (e: React.MouseEvent) => {
