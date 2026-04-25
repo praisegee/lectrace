@@ -49,6 +49,8 @@ export function LinesPanel({
 
   const hidden = new Set(trace.hidden_line_numbers[path] ?? []);
 
+  const sourceLines = useMemo(() => fileContents.split("\n"), [fileContents]);
+
   const scrollRef = useCallback((el: HTMLElement | null) => {
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -75,6 +77,8 @@ export function LinesPanel({
         const cloaked = animateMode && !linesToShow.has(loc);
         const renderings = lineToRenderings.get(ln) ?? [];
         const hasRenderings = !rawMode && renderings.length > 0;
+        const rawLine = sourceLines[idx] ?? "";
+        const indent = rawLine.length - rawLine.trimStart().length;
         return (
           <div key={ln}>
             {showGap && <div className="line-gap" />}
@@ -90,7 +94,10 @@ export function LinesPanel({
                 {ln}
               </span>
               {hasRenderings ? (
-                <div className="renderings">
+                <div
+                  className="renderings"
+                  style={indent > 0 ? { paddingLeft: `${indent * 0.6}em` } : undefined}
+                >
                   {renderings.map((r, i) => (
                     <div key={i}>{renderRendering(r, onGotoLocation)}</div>
                   ))}
