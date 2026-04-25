@@ -19,7 +19,10 @@ def serialize(value: Any, depth: int = 0) -> dict:
         return {"type": "...", "contents": "[max depth]"}
 
     if hasattr(value, "__lectrace__"):
-        return serialize(value.__lectrace__(), depth + 1)
+        try:
+            return serialize(value.__lectrace__(), depth + 1)
+        except Exception:
+            pass
 
     t = _type_str(value)
 

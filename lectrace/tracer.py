@@ -169,8 +169,9 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             (stack[-2].path, stack[-2].line_number) in inspect_call_sites
         )
         inside_inspect_fn = frame.f_code.co_firstlineno in inspect_functions
+        inside_called_fn = len(stack) >= 2
 
-        should_inspect_all = inspect_all or bare_inspect or called_from_inspect or inside_inspect_fn
+        should_inspect_all = inspect_all or bare_inspect or called_from_inspect or inside_inspect_fn or inside_called_fn
 
         step = Step(stack=stack, env={})
         if not steps or step.stack != steps[-1].stack:
