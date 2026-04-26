@@ -7,7 +7,7 @@ name = "lectrace"
 version = "1.1.0"
 description = "Write Python lecture code. Get an interactive viewer on GitHub Pages."
 readme = "README.md"
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 authors = [{ name = "PraiseGod D. Adesanmi", email = "dayopraisegod@gmail.com" }]
 requires-python = ">=3.11"
 dependencies = []
