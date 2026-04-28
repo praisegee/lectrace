@@ -53,10 +53,10 @@ def build(
 
         if incremental and cached_entry.get("hash") == src_hash:
             index_entries.append(cached_entry["index_entry"])
-            print(f"  ✓ {lecture.name} (unchanged)")
+            print(f"  {lecture.name} :: up to date")
             continue
 
-        print(f"  → {lecture.name}")
+        print(f"  {lecture.name} :: building...")
         t0 = time.monotonic()
         trace = execute(lecture)
         elapsed = time.monotonic() - t0
@@ -87,7 +87,8 @@ def build(
 
     _copy_static(output)
     cache_path.write_text(json.dumps(cache, indent=2))
-    print(f"\n✓ {len(index_entries)} lecture(s) → {output}/")
+    noun = "lecture" if len(index_entries) == 1 else "lectures"
+    print(f"\n  done :: {len(index_entries)} {noun} ready in {output}/")
 
 
 def _sha256(path: Path) -> str:

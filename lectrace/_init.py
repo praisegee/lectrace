@@ -28,7 +28,7 @@ def run_init() -> None:
     _update_gitignore()
 
     print("\nDone! Next steps:")
-    print("  1. Enable GitHub Pages in your repo settings → Source: GitHub Actions")
+    print("  1. Enable GitHub Pages in your repo settings (source: GitHub Actions)")
     print("  2. Push to main — your lectures will be live automatically")
     print(f"\n  Preview locally: lectrace serve")
 
@@ -36,20 +36,20 @@ def run_init() -> None:
 def _write_workflow(dest: Path) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists():
-        print(f"  ✓ {dest} already exists, skipping")
+        print(f"  {dest} :: already exists, skipping")
         return
     template = Path(__file__).parent / "_templates" / "lectrace.yml"
     shutil.copy(template, dest)
-    print(f"  ✓ Created {dest}")
+    print(f"  {dest} :: created")
 
 
 def _write_toml(dest: Path) -> None:
     if dest.exists():
-        print(f"  ✓ {dest} already exists, skipping")
+        print(f"  {dest} :: already exists, skipping")
         return
     name = Path.cwd().name.replace("-", " ").replace("_", " ").title()
     dest.write_text(_TOML_TEMPLATE.format(title=name))
-    print(f"  ✓ Created {dest}")
+    print(f"  {dest} :: created")
 
 
 def _update_gitignore() -> None:
@@ -59,4 +59,4 @@ def _update_gitignore() -> None:
     if to_add:
         with open(gi, "a") as f:
             f.write("\n# lectrace\n" + "\n".join(to_add) + "\n")
-        print(f"  ✓ Updated .gitignore")
+        print(f"  .gitignore :: updated")

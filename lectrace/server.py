@@ -13,7 +13,8 @@ def serve(files: list[Path] | None = None, port: int = 7000) -> None:
     output = Path("_site")
     lecture_files = files or discover()
 
-    print(f"Building {len(lecture_files)} lecture(s)...")
+    noun = "lecture" if len(lecture_files) == 1 else "lectures"
+    print(f"Building {len(lecture_files)} {noun}...")
     build(output=output, files=lecture_files, incremental=True)
 
     _watch_and_rebuild(lecture_files, output)
@@ -44,7 +45,11 @@ def _watch_and_rebuild(files: list[Path], output: Path) -> None:
             if changed:
                 for f in changed:
                     mtimes[str(f)] = f.stat().st_mtime
-                print(f"\n  Changed: {', '.join(f.name for f in changed)}")
+                label = (
+                    changed[0].name if len(changed) == 1 else f"{len(changed)} files"
+                )
+                ts = time.strftime("%H:%M:%S")
+                print(f"\n  [{ts}] {label} saved :: rebuilding...")
                 build(output=output, files=changed, incremental=False)
 
     t = threading.Thread(target=watch, daemon=True)
