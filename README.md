@@ -98,13 +98,13 @@ The variable panel on the right tracks state at every step:
 
 Inline comments that control tracing and display:
 
-| Directive | Effect |
-|-----------|--------|
-| `# @inspect x y` | Show `x` and `y` in the variable panel after this line |
-| `# @inspect` | Show all local variables at this line |
-| `# @clear x` | Remove `x` from the variable panel |
-| `# @stepover` | Execute this line without stepping into any calls it makes |
-| `# @hide` | Run this line silently, never shown in the viewer |
+| Directive        | Effect                                                     |
+| ---------------- | ---------------------------------------------------------- |
+| `# @inspect x y` | Show `x` and `y` in the variable panel after this line     |
+| `# @inspect`     | Show all local variables at this line                      |
+| `# @clear x`     | Remove `x` from the variable panel                         |
+| `# @stepover`    | Execute this line without stepping into any calls it makes |
+| `# @hide`        | Run this line silently, never shown in the viewer          |
 
 ---
 
@@ -112,17 +112,17 @@ Inline comments that control tracing and display:
 
 Call these anywhere inside `main()` or any function it calls:
 
-| Function | What it renders |
-|----------|----------------|
-| `text("# Heading")` | Markdown with LaTeX math (`$...$` inline, `$$...$$` display) |
-| `text("...", verbatim=True)` | Monospace, whitespace preserved |
-| `image("fig.png", width=400)` | Local file or remote URL (cached) |
-| `video("demo.mp4")` | Embedded video with controls |
-| `link(my_function)` | Clickable jump to that function in the viewer |
-| `link(title="Paper", url="...", authors=["Smith"], date="2024")` | Reference card with hover metadata |
-| `plot({...})` | Interactive Vega-Lite chart |
-| `note("speaker annotation")` | Presenter note shown as a styled callout |
-| `system_text(["python3", "--version"])` | Shell command output as verbatim text |
+| Function                                                         | What it renders                                              |
+| ---------------------------------------------------------------- | ------------------------------------------------------------ |
+| `text("# Heading")`                                              | Markdown with LaTeX math (`$...$` inline, `$$...$$` display) |
+| `text("...", verbatim=True)`                                     | Monospace, whitespace preserved                              |
+| `image("fig.png", width=400)`                                    | Local file or remote URL (cached)                            |
+| `video("demo.mp4")`                                              | Embedded video with controls                                 |
+| `link(my_function)`                                              | Clickable jump to that function in the viewer                |
+| `link(title="Paper", url="...", authors=["Smith"], date="2024")` | Reference card with hover metadata                           |
+| `plot({...})`                                                    | Interactive Vega-Lite chart                                  |
+| `note("speaker annotation")`                                     | Presenter note shown as a styled callout                     |
+| `system_text(["python3", "--version"])`                          | Shell command output as verbatim text                        |
 
 ---
 
@@ -155,17 +155,17 @@ A mobile-responsive React app that works in any browser. Students need nothing i
 
 **Keyboard shortcuts:**
 
-| Key | Action |
-|-----|--------|
-| `→` or `l` | Step forward |
-| `←` or `h` | Step backward |
+| Key              | Action                             |
+| ---------------- | ---------------------------------- |
+| `→` or `l`       | Step forward                       |
+| `←` or `h`       | Step backward                      |
 | `Shift+→` or `j` | Step over forward (skip sub-calls) |
-| `Shift+←` or `k` | Step over backward |
-| `u` | Step out of current function |
-| `R` | Toggle raw code view |
-| `A` | Toggle reveal animation |
-| `E` | Toggle variable panel |
-| `F` | Toggle fullscreen |
+| `Shift+←` or `k` | Step over backward                 |
+| `u`              | Step out of current function       |
+| `R`              | Toggle raw code view               |
+| `A`              | Toggle reveal animation            |
+| `E`              | Toggle variable panel              |
+| `F`              | Toggle fullscreen                  |
 
 **Mobile:** swipe left/right to step, tap the Variables bar to expand the variable panel.
 
@@ -173,11 +173,11 @@ A mobile-responsive React app that works in any browser. Students need nothing i
 
 ## File naming
 
-| Pattern | Behaviour |
-|---------|-----------|
-| `01_intro.py` | Lecture, appears in sidebar, traced and deployed |
+| Pattern         | Behaviour                                        |
+| --------------- | ------------------------------------------------ |
+| `01_intro.py`   | Lecture, appears in sidebar, traced and deployed |
 | `02_sorting.py` | Lecture, sidebar order follows alphabetical sort |
-| `_utils.py` | Helper, imported normally, never traced or shown |
+| `_utils.py`     | Helper, imported normally, never traced or shown |
 
 ```
 my-course/
