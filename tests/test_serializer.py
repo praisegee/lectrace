@@ -136,3 +136,26 @@ def test_numpy_2d():
         assert r["shape"] == [2, 3]
     except ImportError:
         pass
+
+
+def test_frozenset():
+    r = serialize(frozenset({1, 2}))
+    assert r["type"] == "frozenset"
+    assert len(r["contents"]) == 2
+
+
+def test_non_string_dict_keys():
+    r = serialize({1: "a", (2, 3): "b"})
+    assert r["type"] == "dict"
+    assert "1" in r["contents"]
+    assert repr((2, 3)) in r["contents"]
+
+
+def test_empty_list():
+    r = serialize([])
+    assert r == {"type": "list", "contents": []}
+
+
+def test_empty_dict():
+    r = serialize({})
+    assert r == {"type": "dict", "contents": {}}
