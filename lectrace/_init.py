@@ -1,7 +1,7 @@
 from __future__ import annotations
+
 import shutil
 from pathlib import Path
-
 
 _TOML_TEMPLATE = """\
 [lectrace]
@@ -30,7 +30,7 @@ def run_init() -> None:
     print("\nDone! Next steps:")
     print("  1. Enable GitHub Pages in your repo settings (source: GitHub Actions)")
     print("  2. Push to main — your lectures will be live automatically")
-    print(f"\n  Preview locally: lectrace serve")
+    print("\n  Preview locally: lectrace serve")
 
 
 def _write_workflow(dest: Path) -> None:
@@ -59,4 +59,4 @@ def _update_gitignore() -> None:
     if to_add:
         with open(gi, "a") as f:
             f.write("\n# lectrace\n" + "\n".join(to_add) + "\n")
-        print(f"  .gitignore :: updated")
+        print("  .gitignore :: updated")

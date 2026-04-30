@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from html.parser import HTMLParser
 
@@ -21,31 +22,48 @@ def fetch_reference(url: str, **kwargs) -> Reference:
     html = html_path.read_text(encoding="utf-8")
 
     try:
-        from bs4 import BeautifulSoup  # type: ignore[import-untyped]
+        from bs4 import BeautifulSoup  # type: ignore # noqa: F401
+
         return _parse_bs4(html, url, **kwargs)
     except ImportError:
         return _parse_stdlib(html, url, **kwargs)
 
 
 def _parse_bs4(html: str, url: str, **kwargs) -> Reference:
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup  # type: ignore
+
     soup = BeautifulSoup(html, "html.parser")
 
     def meta(name: str, prop: str | None = None) -> str:
-        tag = soup.find("meta", {"name": name}) or (prop and soup.find("meta", {"property": prop}))
+        tag = soup.find("meta", {"name": name}) or (
+            prop and soup.find("meta", {"property": prop})
+        )
         return _collapse(tag["content"]) if tag else ""  # type: ignore[index]
 
     title = meta("citation_title")
     authors_div = soup.find("div", class_="authors")
     if authors_div:
-        authors = [_collapse(a.get_text()) for a in authors_div.find_all("a") if "searchtype=author" in (a.get("href") or "")]
+        authors = [
+            _collapse(a.get_text())
+            for a in authors_div.find_all("a")
+            if "searchtype=author" in (a.get("href") or "")
+        ]
     else:
-        authors = [_collapse(t["content"]) for t in soup.find_all("meta", {"name": "citation_author"})]
+        authors = [
+            _collapse(t["content"])
+            for t in soup.find_all("meta", {"name": "citation_author"})
+        ]
     date = meta("citation_date").replace("/", "-")
     description = meta("", prop="og:description")
 
-    return Reference(title=title, authors=authors or None, url=url, date=date or None,
-                     description=description or None, **kwargs)
+    return Reference(
+        title=title,
+        authors=authors or None,
+        url=url,
+        date=date or None,
+        description=description or None,
+        **kwargs,
+    )
 
 
 def _parse_stdlib(html: str, url: str, **kwargs) -> Reference:
@@ -55,12 +73,21 @@ def _parse_stdlib(html: str, url: str, **kwargs) -> Reference:
 
     title = _collapse(meta.get("citation_title", ""))
     raw_authors = meta.get("citation_author", [])
-    authors = [_collapse(a) for a in (raw_authors if isinstance(raw_authors, list) else [raw_authors])]
+    authors = [
+        _collapse(a)
+        for a in (raw_authors if isinstance(raw_authors, list) else [raw_authors])
+    ]
     date = meta.get("citation_date", "").replace("/", "-")
     description = _collapse(meta.get("og:description", ""))
 
-    return Reference(title=title or None, authors=authors or None, url=url,
-                     date=date or None, description=description or None, **kwargs)
+    return Reference(
+        title=title or None,
+        authors=authors or None,
+        url=url,
+        date=date or None,
+        description=description or None,
+        **kwargs,
+    )
 
 
 class _MetaParser(HTMLParser):
@@ -77,7 +104,9 @@ class _MetaParser(HTMLParser):
         if key and val:
             if key in self.meta:
                 existing = self.meta[key]
-                self.meta[key] = ([existing] if isinstance(existing, str) else existing) + [val]
+                self.meta[key] = (
+                    [existing] if isinstance(existing, str) else existing
+                ) + [val]
             else:
                 self.meta[key] = val
 

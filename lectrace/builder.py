@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import hashlib
 import json
 import re
@@ -7,22 +8,35 @@ import time
 from dataclasses import asdict
 from pathlib import Path
 
+_SKIP_DIRS = {
+    "__pycache__",
+    ".venv",
+    "venv",
+    "env",
+    "node_modules",
+    ".git",
+    "_site",
+    "site-packages",
+}
 
-_SKIP_DIRS = {"__pycache__", ".venv", "venv", "env", "node_modules", ".git", "_site", "site-packages"}
 
 def discover(patterns: list[str] | None = None, root: Path | None = None) -> list[Path]:
     root = root or Path.cwd()
     if patterns:
         return sorted(p for pattern in patterns for p in root.glob(pattern))
     candidates = (
-        p for p in root.rglob("*.py")
+        p
+        for p in root.rglob("*.py")
         if not p.name.startswith("_")
         and not any(part in _SKIP_DIRS for part in p.parts)
         and p.stat().st_size < 500_000
     )
     return sorted(
-        p for p in candidates
-        if re.search(r"from\s+lectrace\s+import|import\s+lectrace", p.read_text(encoding="utf-8"))
+        p
+        for p in candidates
+        if re.search(
+            r"from\s+lectrace\s+import|import\s+lectrace", p.read_text(encoding="utf-8")
+        )
     )
 
 

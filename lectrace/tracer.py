@@ -1,15 +1,24 @@
 from __future__ import annotations
+
 import ast
 import hashlib
 import sys
 import traceback as tb
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from lectrace import __version__
-from lectrace.directives import parse, inspect_vars, clear_vars, has, INSPECT, STEPOVER, HIDE
+from lectrace.directives import (
+    HIDE,
+    INSPECT,
+    STEPOVER,
+    clear_vars,
+    has,
+    inspect_vars,
+    parse,
+)
 from lectrace.files import relativize
 from lectrace.renderings import Rendering, flush
 from lectrace.serializer import serialize
@@ -112,12 +121,14 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         for fi in tb.extract_stack():
             if fi.filename not in visible:
                 continue
-            frames.append(StackFrame(
-                path=relativize(fi.filename),
-                line_number=fi.lineno,
-                function_name=fi.name,
-                source_line=(fi.line or "").strip(),
-            ))
+            frames.append(
+                StackFrame(
+                    path=relativize(fi.filename),
+                    line_number=fi.lineno,
+                    function_name=fi.name,
+                    source_line=(fi.line or "").strip(),
+                )
+            )
         return frames
 
     # (path, line) of bare @inspect call sites — propagates inspection one level into called fn
@@ -139,11 +150,18 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
 
         current = stack[-1]
 
-        if current.function_name in ("<listcomp>", "<genexpr>", "<setcomp>", "<dictcomp>"):
+        if current.function_name in (
+            "<listcomp>",
+            "<genexpr>",
+            "<setcomp>",
+            "<dictcomp>",
+        ):
             return on_line
 
         end_ln = stmt_spans.get(frame.f_lineno, frame.f_lineno)
-        directives = [d for ln in src_lines[frame.f_lineno - 1 : end_ln] for d in parse(ln)]
+        directives = [
+            d for ln in src_lines[frame.f_lineno - 1 : end_ln] for d in parse(ln)
+        ]
 
         if has(directives, STEPOVER):
             key = (current.path, current.line_number)
@@ -160,18 +178,26 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         bare_inspect = has(directives, INSPECT) and not inspect_vars(directives)
         if bare_inspect:
             if src_lines[frame.f_lineno - 1].lstrip().startswith("def "):
-                bare_inspect = False  # inside_inspect_fn handles this; don't dump all locals here
+                bare_inspect = (
+                    False  # inside_inspect_fn handles this; don't dump all locals here
+                )
             else:
                 inspect_call_sites.add((current.path, current.line_number))
 
         called_from_inspect = (
-            len(stack) >= 2 and
-            (stack[-2].path, stack[-2].line_number) in inspect_call_sites
+            len(stack) >= 2
+            and (stack[-2].path, stack[-2].line_number) in inspect_call_sites
         )
         inside_inspect_fn = frame.f_code.co_firstlineno in inspect_functions
         inside_called_fn = len(stack) >= 2
 
-        should_inspect_all = inspect_all or bare_inspect or called_from_inspect or inside_inspect_fn or inside_called_fn
+        should_inspect_all = (
+            inspect_all
+            or bare_inspect
+            or called_from_inspect
+            or inside_inspect_fn
+            or inside_called_fn
+        )
 
         step = Step(stack=stack, env={})
         if not steps or step.stack != steps[-1].stack:
@@ -182,7 +208,11 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             target = steps[step_index]
 
             frame_locals = frame.f_locals
-            exprs = list(frame_locals.keys()) if should_inspect_all else inspect_vars(directives)
+            exprs = (
+                list(frame_locals.keys())
+                if should_inspect_all
+                else inspect_vars(directives)
+            )
 
             for expr in exprs:
                 parts = expr.split(".", 1)
@@ -262,12 +292,16 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
 
 def _under_stepover(stack: list[StackFrame], stepovers: list[tuple[str, int]]) -> bool:
     for ancestor in stack[:-1]:
-        if any(s[0] == ancestor.path and s[1] == ancestor.line_number for s in stepovers):
+        if any(
+            s[0] == ancestor.path and s[1] == ancestor.line_number for s in stepovers
+        ):
             return True
     return False
 
 
-_RENDER_FNS = frozenset({"text", "note", "plot", "image", "video", "link", "system_text"})
+_RENDER_FNS = frozenset(
+    {"text", "note", "plot", "image", "video", "link", "system_text"}
+)
 
 
 def _render_interior_lines(source_text: str) -> set[int]:

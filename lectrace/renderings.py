@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import inspect
 import re
 import subprocess
@@ -60,22 +61,32 @@ def video(url: str, style: dict | None = None, width: int | str | None = None) -
     _store().append(Rendering(type="video", data=path, style=s))
 
 
-def link(arg: type | Reference | str | None = None, style: dict | None = None, **kwargs) -> None:
+def link(
+    arg: type | Reference | str | None = None, style: dict | None = None, **kwargs
+) -> None:
     s = style or None
     match arg:
         case None:
             ref = Reference(**kwargs)
-            _store().append(Rendering(type="link", data=ref.label, style=s, external_link=ref))
+            _store().append(
+                Rendering(type="link", data=ref.label, style=s, external_link=ref)
+            )
         case Reference():
-            _store().append(Rendering(type="link", data=arg.label, style=s, external_link=arg))
+            _store().append(
+                Rendering(type="link", data=arg.label, style=s, external_link=arg)
+            )
         case str():
             ref = url_reference(arg, **kwargs)
-            _store().append(Rendering(type="link", data=ref.label, style=s, external_link=ref))
+            _store().append(
+                Rendering(type="link", data=ref.label, style=s, external_link=ref)
+            )
         case _ if isinstance(arg, type) or callable(arg):
             src = inspect.getfile(arg)
             _, lineno = inspect.getsourcelines(arg)
             loc = CodeLocation(relativize(src), lineno)
-            _store().append(Rendering(type="link", data=arg.__name__, style=s, internal_link=loc))
+            _store().append(
+                Rendering(type="link", data=arg.__name__, style=s, internal_link=loc)
+            )
         case _:
             raise TypeError(f"link() got unexpected argument: {type(arg)}")
 
@@ -95,7 +106,8 @@ def system_text(command: list[str]) -> None:
 
 
 def url_reference(url: str, **kwargs) -> Reference:
-    from lectrace.arxiv import is_arxiv_url, fetch_reference
+    from lectrace.arxiv import fetch_reference, is_arxiv_url
+
     # arXiv URLs get auto-scraped for title/authors; everything else is a plain reference
     if is_arxiv_url(url) and not kwargs.get("title"):
         try:

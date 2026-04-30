@@ -1,6 +1,6 @@
 from __future__ import annotations
+
 import http.server
-import os
 import threading
 import time
 import webbrowser

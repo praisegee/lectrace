@@ -124,6 +124,30 @@ Call these anywhere inside `main()` or any function it calls:
 | `note("speaker annotation")`                                     | Presenter note shown as a styled callout                     |
 | `system_text(["python3", "--version"])`                          | Shell command output as verbatim text                        |
 
+## Citing arXiv papers
+
+Pass an arXiv URL to `link()` and lectrace fetches the title, authors, date, and abstract for you automatically. No manual metadata needed:
+
+```python
+# lectrace fetches everything from arXiv
+link(url="https://arxiv.org/abs/1706.03762")
+
+# without arXiv auto-fetch, you'd write this by hand
+link(title="Attention Is All You Need", authors=["Vaswani", "Shazeer", "Parmar", "..."], date="2017", url="https://arxiv.org/abs/1706.03762")
+```
+
+Both `/abs/` and `/pdf/` arXiv URLs are supported. Metadata is cached locally so the network request only happens once per paper.
+
+For more robust HTML parsing, install the `arxiv` extra:
+
+```sh
+pip install lectrace[arxiv]
+# or
+uv add lectrace[arxiv]
+```
+
+Without it, lectrace falls back to the standard library's HTML parser, which works for most papers.
+
 ---
 
 ## Custom type rendering
