@@ -1,10 +1,16 @@
 # lectrace
 
-Write Python lecture code. Get an interactive step-through viewer on GitHub Pages — automatically.
+**Executable Python lecture notes.**
 
-lectrace traces your Python code line by line using `sys.settrace`, captures variable state and rendered content at each step, and produces a static React app that lets anyone step through the execution with arrow keys. No Node.js, no configuration, no build step for the user — just Python.
+Write a Python script. Run `lectrace serve` to get an interactive step-through viewer in your browser. Push to GitHub to deploy it to GitHub Pages, automatically.
+
+No Node.js. No configuration. No build step for your students. Just Python.
 
 > Inspired by [edtrace](https://github.com/percyliang/edtrace) by Percy Liang.
+
+---
+
+<video src="demo.mp4" autoplay loop muted playsinline width="100%"></video>
 
 ---
 
@@ -16,13 +22,13 @@ uv add lectrace
 pip install lectrace
 ```
 
-Requires Python 3.11+. Zero mandatory dependencies — lectrace uses the standard library only. numpy, torch, and sympy are detected and rendered automatically if they are already installed in your environment.
+Requires Python 3.11+. Zero mandatory dependencies. lectrace uses the standard library only. numpy, torch, and sympy are detected and rendered automatically if already installed in your environment.
 
 ---
 
-## The recommended pattern
+## Write a lecture
 
-A lecture file is a plain Python script. Define `main()` first, put helper functions below it, and call `main()` at the end with the standard guard. This is valid Python — functions defined below `main()` are resolved at call time, not definition time.
+A lecture file is a plain Python script. Define `main()` first, put helper functions below it, call `main()` at the end:
 
 ```python
 # 01_binary_search.py
@@ -54,51 +60,51 @@ if __name__ == "__main__":
     main()
 ```
 
-**What this gives you:**
+This gives you three things at once:
 
-- Run `python 01_binary_search.py` — works as a plain script, no lectrace involvement
-- Run `lectrace serve` — opens the interactive viewer in your browser
-- Push to GitHub — viewer deploys automatically to GitHub Pages
+- `python 01_binary_search.py`: runs as a plain script, no lectrace involvement
+- `lectrace serve`: opens the interactive viewer in your browser
+- `git push`: deploys to GitHub Pages automatically
 
-The tracer only traces code that runs inside `main()`. Imports and function definitions are invisible — they're just setup. Other functions appear in the viewer only when `main()` actually calls them.
+The tracer only traces code that runs inside `main()`. Imports and function definitions are invisible (they're just setup). Helper functions appear in the viewer only when `main()` actually calls them.
 
 ---
 
 ## How tracing works
 
-lectrace loads your file silently (running imports and defining functions), then calls `main()` with the tracer active. The result:
+lectrace loads your file silently (running imports and defining functions), then calls `main()` with `sys.settrace` active:
 
-- **Module-level code** (imports, `def` statements) — never generates a step
-- **`main()` and every function it calls** — stepped through line by line
-- **Functions defined but never called** — invisible
+- **Module-level code** (imports, `def` statements): never generates a step
+- **`main()` and every function it calls**: stepped through line by line
+- **Functions defined but never called**: invisible
 
-When execution enters a helper function, the viewer shows the `def` line first with the function's arguments already in the variable panel, then steps through the body line by line. When the function returns, the viewer jumps back to the call site.
+When execution enters a helper function, the viewer shows the `def` line first with arguments already in the variable panel, then steps through the body. When the function returns, the viewer jumps back to the call site.
 
 ---
 
 ## Variable panel
 
-The variable panel on the right shows state at each step:
+The variable panel on the right tracks state at every step:
 
-- **Inside `main()`** — only variables explicitly marked with `# @inspect` are shown
-- **Inside any called function** — all local variables are shown automatically, no directives needed
-- **Call stack** — displayed above the variables when inside a helper function, showing the full chain of calls
-- **New variables** — highlighted in green when they first appear
-- **Changed variables** — highlighted in amber when their value changes
+- **Inside `main()`**: only variables marked with `# @inspect` are shown
+- **Inside any helper function**: all local variables are shown automatically, no directives needed
+- **Call stack**: shown above variables when inside a helper, displaying the full chain of calls
+- **New variables**: highlighted in green when they first appear
+- **Changed variables**: highlighted in amber when their value changes
 
 ---
 
 ## Directives
 
-Directives are inline comments that control tracing and display:
+Inline comments that control tracing and display:
 
 | Directive | Effect |
 |-----------|--------|
-| `# @inspect x y` | Show `x` and `y` in the variable panel after this line (use in `main()`) |
-| `# @inspect` | Show all local variables at this line in `main()` |
+| `# @inspect x y` | Show `x` and `y` in the variable panel after this line |
+| `# @inspect` | Show all local variables at this line |
 | `# @clear x` | Remove `x` from the variable panel |
 | `# @stepover` | Execute this line without stepping into any calls it makes |
-| `# @hide` | Run this line silently — never shown in the viewer |
+| `# @hide` | Run this line silently, never shown in the viewer |
 
 ---
 
@@ -145,15 +151,15 @@ Without `__lectrace__`, nested objects show their full repr. With it, you contro
 
 ## Viewer
 
-The viewer is a mobile-responsive React app that works in any browser — no installation required for viewers.
+A mobile-responsive React app that works in any browser. Students need nothing installed.
 
-**Keyboard shortcuts (desktop):**
+**Keyboard shortcuts:**
 
 | Key | Action |
 |-----|--------|
 | `→` or `l` | Step forward |
 | `←` or `h` | Step backward |
-| `Shift+→` or `j` | Step over forward (skip into sub-calls) |
+| `Shift+→` or `j` | Step over forward (skip sub-calls) |
 | `Shift+←` or `k` | Step over backward |
 | `u` | Step out of current function |
 | `R` | Toggle raw code view |
@@ -161,7 +167,7 @@ The viewer is a mobile-responsive React app that works in any browser — no ins
 | `E` | Toggle variable panel |
 | `F` | Toggle fullscreen |
 
-**Mobile:** swipe left/right to step, tap the Variables bar at the bottom to expand the variable panel, use the fixed navigation bar for step controls.
+**Mobile:** swipe left/right to step, tap the Variables bar to expand the variable panel.
 
 ---
 
@@ -169,11 +175,9 @@ The viewer is a mobile-responsive React app that works in any browser — no ins
 
 | Pattern | Behaviour |
 |---------|-----------|
-| `01_intro.py` | Lecture — appears in sidebar, traced and deployed |
-| `02_sorting.py` | Lecture — sidebar order follows alphabetical sort |
-| `_utils.py` | Helper — imported normally, never traced or shown |
-
-Number prefixes control sidebar order. Helper files starting with `_` are ignored by lectrace entirely.
+| `01_intro.py` | Lecture, appears in sidebar, traced and deployed |
+| `02_sorting.py` | Lecture, sidebar order follows alphabetical sort |
+| `_utils.py` | Helper, imported normally, never traced or shown |
 
 ```
 my-course/
@@ -212,10 +216,10 @@ Enable GitHub Pages in your repo settings (Source: **GitHub Actions**). Every pu
 
 ## How it works
 
-- **Tracer** — loads the module without tracing (so imports and `def` statements are invisible), then activates `sys.settrace` and calls `main()`. Every step the viewer shows is inside a function that was actually called.
-- **Serializer** — converts Python values to JSON. Primitives are direct. Collections recurse. numpy/torch/sympy are imported lazily only when encountered.
-- **Builder** — discovers lecture files, runs each through the tracer, writes `traces/*.json` plus a `traces/index.json` manifest. Incremental: files are skipped if their SHA-256 hash hasn't changed.
-- **Viewer** — a pre-built React + TypeScript SPA bundled into `lectrace/_static/` and shipped inside the pip package. Uses HashRouter so it works at any URL depth with zero configuration. Math via KaTeX, charts via Vega-Lite, syntax highlighting via highlight.js.
+- **Tracer**: loads the module without tracing, then activates `sys.settrace` and calls `main()`. Every step shown is inside a function that was actually called.
+- **Serializer**: converts Python values to JSON. Primitives are direct. Collections recurse. numpy/torch/sympy are detected lazily.
+- **Builder**: discovers lecture files, runs each through the tracer, writes `traces/*.json` plus a manifest. Incremental: files are skipped if their SHA-256 hash hasn't changed.
+- **Viewer**: a pre-built React + TypeScript SPA bundled into the pip package. Uses HashRouter so it works at any URL depth with zero configuration. Math via KaTeX, charts via Vega-Lite, syntax highlighting via highlight.js.
 
 ---
 
