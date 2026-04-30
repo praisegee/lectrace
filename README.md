@@ -14,7 +14,7 @@ No Node.js. No configuration. No build step for your students. Just Python.
 
 ---
 
-**See it live:** [AI Lectures](https://praisegee.github.io/ai-lectures/) — a real course built with lectrace ([source](https://github.com/praisegee/ai-lectures))
+**See it live:** [AI Lectures](https://praisegee.github.io/ai-lectures/), a real course built with lectrace ([source](https://github.com/praisegee/ai-lectures))
 
 ---
 
