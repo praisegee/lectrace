@@ -10,7 +10,7 @@ No Node.js. No configuration. No build step for your students. Just Python.
 
 ---
 
-<video src="demo.mp4" autoplay loop muted playsinline width="100%"></video>
+![Demo](demo.gif)
 
 ---
 
