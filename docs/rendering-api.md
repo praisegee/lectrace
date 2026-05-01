@@ -154,7 +154,24 @@ link(
 
 ## plot()
 
-Embed an interactive [Vega-Lite](https://vega.github.io/vega-lite/) chart.
+Embed a chart. Pass a **matplotlib `Figure`** or a raw [Vega-Lite](https://vega.github.io/vega-lite/) spec dict.
+
+### matplotlib (recommended)
+
+```python
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+ax.bar(["A", "B", "C"], [3, 7, 2])
+ax.set_title("Distribution")
+plot(fig)
+```
+
+Any matplotlib chart type works — line, scatter, histogram, heatmap, subplots, etc. The figure is rendered as a crisp SVG and the Figure object is closed automatically.
+
+### Vega-Lite spec
+
+For interactive charts (zoom, pan, tooltips), pass a raw Vega-Lite dict:
 
 ```python
 plot({
@@ -162,20 +179,18 @@ plot({
     "width": 400,
     "height": 250,
     "data": {"values": [{"x": 1, "y": 2}, {"x": 2, "y": 4}, {"x": 3, "y": 1}]},
-    "mark": "bar",
+    "mark": "point",
     "encoding": {
-        "x": {"field": "x", "type": "ordinal"},
+        "x": {"field": "x", "type": "quantitative"},
         "y": {"field": "y", "type": "quantitative"},
     },
 })
 ```
 
-Pass any valid Vega-Lite spec as a Python dict. The chart is interactive — zoom, pan, and tooltip work out of the box.
-
 **Signature:**
 
 ```python
-plot(spec: object) -> None
+plot(spec: Figure | dict) -> None
 ```
 
 ---

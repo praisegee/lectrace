@@ -92,6 +92,24 @@ def link(
 
 
 def plot(spec: object) -> None:
+    try:
+        import matplotlib.figure
+
+        if isinstance(spec, matplotlib.figure.Figure):
+            import base64
+            import io
+
+            buf = io.BytesIO()
+            spec.savefig(buf, format="svg", bbox_inches="tight")
+            buf.seek(0)
+            data = "data:image/svg+xml;base64," + base64.b64encode(buf.read()).decode()
+            import matplotlib.pyplot as plt
+
+            plt.close(spec)
+            _store().append(Rendering(type="image", data=data))
+            return
+    except ImportError:
+        pass
     _store().append(Rendering(type="plot", data=spec))  # type: ignore[arg-type]
 
 
