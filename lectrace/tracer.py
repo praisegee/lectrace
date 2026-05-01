@@ -107,6 +107,13 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
     sys.modules["_lecture"] = module
     visible.add(str(source.resolve()))
 
+    source_dir = str(source.parent.resolve())
+    if source_dir not in sys.path:
+        sys.path.insert(0, source_dir)
+        _added_to_path = True
+    else:
+        _added_to_path = False
+
     # Statically detect functions marked with bare @inspect on their def line.
     # We do this before tracing so module-level execution doesn't need to be traced at all.
     inspect_functions: set[int] = set()
@@ -266,6 +273,8 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             sys.settrace(None)
 
     sys.modules.pop("_lecture", None)
+    if _added_to_path and source_dir in sys.path:
+        sys.path.remove(source_dir)
 
     files = {relativize(source.resolve()): src_text}
     hidden = _hidden_lines(files)
