@@ -8,6 +8,25 @@ import time
 from dataclasses import asdict
 from pathlib import Path
 
+
+class _TraceEncoder(json.JSONEncoder):
+    def default(self, o: object) -> object:
+        try:
+            import numpy as np
+
+            if isinstance(o, np.ndarray):
+                return o.tolist()
+            if isinstance(o, np.integer):
+                return int(o)
+            if isinstance(o, np.floating):
+                return float(o)
+            if isinstance(o, np.bool_):
+                return bool(o)
+        except ImportError:
+            pass
+        return super().default(o)
+
+
 _SKIP_DIRS = {
     "__pycache__",
     ".venv",
@@ -77,7 +96,7 @@ def build(
 
         out_path = traces_dir / f"{lecture.stem}.json"
         with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(asdict(trace), f, indent=2)
+            json.dump(asdict(trace), f, indent=2, cls=_TraceEncoder)
 
         entry = {
             "id": lecture.stem,

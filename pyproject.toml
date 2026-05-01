@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lectrace"
-version = "1.1.3"
+version = "1.1.4"
 description = "Write Python lecture code. Get an interactive viewer on GitHub Pages."
 readme = "README.md"
 license = { file = "LICENSE" }
