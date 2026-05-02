@@ -18,6 +18,7 @@
     "react-markdown": "^9.0.3",
     "react-router-dom": "^7.5.0",
     "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
     "vega": "^5.33.0",
     "vega-embed": "^6.29.0",
