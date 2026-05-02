@@ -106,14 +106,14 @@ function renderValue(value: Value, depth: number): React.ReactNode {
 }
 
 function ListValue({ items, label, depth }: { items: Value[]; label: string; depth: number }) {
-  const [expanded, setExpanded] = useState(depth === 0);
+  const [expanded, setExpanded] = useState(items.length <= 3);
 
   if (items.length === 0) return <span className="value-empty">[]</span>;
 
   const allPrimitive = items.every(isPrimitive);
 
   // Short primitive list: inline
-  if (allPrimitive && items.length <= 10) {
+  if (allPrimitive && items.length <= 3) {
     return (
       <span className="value-list-inline">
         [{items.map((v, i) => (
@@ -177,7 +177,7 @@ function ListValue({ items, label, depth }: { items: Value[]; label: string; dep
 }
 
 function DictValue({ entries, depth }: { entries: [string, Value][]; depth: number }) {
-  const [expanded, setExpanded] = useState(depth <= 1);
+  const [expanded, setExpanded] = useState(entries.length <= 3);
 
   if (entries.length === 0) return <span className="value-empty">{"{}"}</span>;
 

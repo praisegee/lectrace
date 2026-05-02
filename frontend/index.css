@@ -585,7 +585,7 @@ body.resizing {
   font-weight: 600;
   color: var(--color-accent);
   white-space: nowrap;
-  padding-right: 6px !important;
+  padding-right: 2px !important;
 }
 
 .env-type {
@@ -599,7 +599,7 @@ body.resizing {
 
 .env-eq {
   color: var(--color-muted);
-  padding: 0 4px !important;
+  padding: 0 2px !important;
 }
 
 .env-val {
