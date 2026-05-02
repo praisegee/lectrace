@@ -842,57 +842,30 @@ body.resizing {
   z-index: 300;
 }
 
-/* ─── Empty state prompt ─── */
+/* ─── App loader ─── */
 
-.trace-prompt {
-  padding: 60px 40px;
-  max-width: 520px;
-}
-
-.trace-prompt h2 {
-  font-size: 24px;
-  margin-bottom: 8px;
-}
-
-.trace-prompt p {
-  color: var(--color-muted);
-  margin-bottom: 20px;
-}
-
-.trace-prompt form {
+.app-loader {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 14px;
+  color: var(--color-muted);
+  font-size: 15px;
 }
 
-.trace-input {
-  flex: 1;
-  padding: 8px 12px;
-  font-size: 17px;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  outline: none;
-  font-family: var(--font-code);
+.app-loader-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: loader-spin 0.7s linear infinite;
 }
 
-.trace-input:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.12);
-}
-
-.trace-prompt button,
-.nav-buttons button[type="submit"] {
-  padding: 8px 16px;
-  font-size: 17px;
-  background: var(--color-accent);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.trace-prompt button:hover {
-  background: #0860c4;
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ─── Markdown rendered content ─── */

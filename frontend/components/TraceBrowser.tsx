@@ -6,9 +6,10 @@ import { CloseIcon } from "./icons";
 interface Props {
   open?: boolean;
   onClose?: () => void;
+  onReady?: () => void;
 }
 
-export function TraceBrowser({ open, onClose }: Props) {
+export function TraceBrowser({ open, onClose, onReady }: Props) {
   const [index, setIndex] = useState<TraceIndex | null>(null);
   const [params, setParams] = useSearchParams();
   const active = params.get("trace");
@@ -21,8 +22,9 @@ export function TraceBrowser({ open, onClose }: Props) {
         if (!params.get("trace") && data.traces.length > 0) {
           setParams((p) => { p.set("trace", data.traces[0].id); return p; });
         }
+        onReady?.();
       })
-      .catch(() => null);
+      .catch(() => { onReady?.(); });
   }, []);
 
   if (!index || index.traces.length === 0) return null;

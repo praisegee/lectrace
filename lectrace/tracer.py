@@ -75,17 +75,31 @@ def _statement_lines(source_text: str) -> set[int]:
     return {node.lineno for node in ast.walk(tree) if isinstance(node, ast.stmt)}
 
 
+_COMPOUND_STMTS = (
+    ast.For, ast.AsyncFor, ast.While, ast.If,
+    ast.With, ast.AsyncWith, ast.Try, ast.TryStar,
+    ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef,
+)
+
 def _statement_spans(source_text: str) -> dict[int, int]:
-    """Return mapping of statement start line → end line."""
+    """Return mapping of statement start line → end line.
+
+    Compound statements (for, while, if, etc.) only span their header line so
+    that directives in the body do not bleed into the header's directive set.
+    """
     try:
         tree = ast.parse(source_text)
     except SyntaxError:
         return {}
-    return {
-        node.lineno: node.end_lineno
-        for node in ast.walk(tree)
-        if isinstance(node, ast.stmt) and node.end_lineno
-    }
+    result = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.stmt) or not node.end_lineno:
+            continue
+        if isinstance(node, _COMPOUND_STMTS):
+            result[node.lineno] = node.lineno
+        else:
+            result[node.lineno] = node.end_lineno
+    return result
 
 
 def execute(source: Path, inspect_all: bool = False) -> Trace:
