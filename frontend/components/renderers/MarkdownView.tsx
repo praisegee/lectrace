@@ -8,10 +8,16 @@ interface Props {
   style?: React.CSSProperties;
 }
 
+const components = {
+  a: ({ href, children }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+  ),
+};
+
 export function MarkdownView({ content, style }: Props) {
   return (
     <div style={style} className="markdown-content">
-      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={components}>
         {content}
       </ReactMarkdown>
     </div>
