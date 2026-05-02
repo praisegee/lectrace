@@ -109,6 +109,18 @@ export function TraceViewer({ onToggleSidebar }: Props) {
   const currentPath = frame?.path ?? Object.keys(trace.files)[0];
   const currentLine = frame?.line_number ?? 1;
 
+  const entryDefLine = (() => {
+    if (stepIndex !== 0) return null;
+    const fn = trace.steps[0]?.stack.at(-1)?.function_name;
+    if (!fn) return null;
+    const lines = (trace.files[currentPath] ?? "").split("\n");
+    const idx = lines.findIndex(l => {
+      const t = l.trimStart();
+      return t.startsWith(`def ${fn}(`) || t.startsWith(`async def ${fn}(`);
+    });
+    return idx >= 0 ? idx + 1 : null;
+  })();
+
   const hasEnvContent = !hideEnv &&
     trace.steps.slice(0, stepIndex + 1).some(s => Object.keys(s.env).length > 0);
 
@@ -172,6 +184,7 @@ export function TraceViewer({ onToggleSidebar }: Props) {
             stepIndex={stepIndex}
             rawMode={rawMode}
             animateMode={animateMode}
+            entryDefLine={entryDefLine}
             onGotoLine={gotoLine}
             onGotoLocation={gotoLocation}
           />

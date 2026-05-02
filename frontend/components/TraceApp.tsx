@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { TraceBrowser } from "./TraceBrowser";
+import { TraceViewer } from "./TraceViewer";
 
 function AppLoader() {
   return (
@@ -8,12 +11,9 @@ function AppLoader() {
     </div>
   );
 }
-import { useSearchParams } from "react-router-dom";
-import { TraceBrowser } from "./TraceBrowser";
-import { TraceViewer } from "./TraceViewer";
 
 export function TraceApp() {
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [ready, setReady] = useState(false);

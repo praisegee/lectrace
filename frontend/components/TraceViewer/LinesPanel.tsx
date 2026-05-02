@@ -17,13 +17,14 @@ interface Props {
   stepIndex: number;
   rawMode: boolean;
   animateMode: boolean;
+  entryDefLine: number | null;
   onGotoLine: (ln: number) => void;
   onGotoLocation: (path: string, ln: number) => void;
 }
 
 export function LinesPanel({
   trace, path, lineNumber, stepIndex,
-  rawMode, animateMode,
+  rawMode, animateMode, entryDefLine,
   onGotoLine, onGotoLocation,
 }: Props) {
   const fileContents = trace.files[path] ?? "";
@@ -61,6 +62,11 @@ export function LinesPanel({
     }
   }, []);
 
+  const entryDefRef = useCallback((el: HTMLElement | null) => {
+    if (!el) return;
+    el.scrollIntoView({ behavior: "instant", block: "start" });
+  }, []);
+
   let prevVisibleLn = 0;
 
   return (
@@ -79,11 +85,13 @@ export function LinesPanel({
         const hasRenderings = !rawMode && renderings.length > 0;
         const rawLine = sourceLines[idx] ?? "";
         const indent = rawLine.length - rawLine.trimStart().length;
+        const lineRef = ln === entryDefLine ? entryDefRef
+          : (isCurrent && entryDefLine === null ? scrollRef : null);
         return (
           <div key={ln}>
             {showGap && <div className="line-gap" />}
             <div
-              ref={isCurrent ? scrollRef : null}
+              ref={lineRef}
               className={["line", isCurrent ? "current-line" : "", cloaked ? "cloaked" : "", hasRenderings ? "has-renderings" : ""].filter(Boolean).join(" ")}
             >
               <span

@@ -9,7 +9,6 @@ interface Props {
 }
 
 export function EnvPanel({ trace, stepIndex }: Props) {
-  const panelRef = useRef<HTMLDivElement>(null);
   const step = trace.steps[stepIndex];
   const stack = step?.stack ?? [];
 
@@ -22,11 +21,10 @@ export function EnvPanel({ trace, stepIndex }: Props) {
   const hasVars = Object.keys(env).length > 0;
   const showStack = stack.length > 1;
 
+  const bottomRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const panel = panelRef.current;
-    if (!panel) return;
-    const target = panel.querySelector<HTMLElement>(".env-row--new, .env-row--changed");
-    if (target) target.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [stepIndex]);
 
   if (!hasVars && !showStack) return null;
@@ -34,7 +32,7 @@ export function EnvPanel({ trace, stepIndex }: Props) {
   const currentFn = stack.at(-1)?.function_name;
 
   return (
-    <div className="env-panel" ref={panelRef}>
+    <div className="env-panel">
       {showStack && <CallStack stack={stack} />}
 
       {hasVars && (
@@ -74,6 +72,7 @@ export function EnvPanel({ trace, stepIndex }: Props) {
           </table>
         </>
       )}
+      <div ref={bottomRef} />
     </div>
   );
 }
