@@ -41,12 +41,13 @@ export function LinesPanel({
 
   const lineToRenderings = useMemo(() => {
     const map = new Map<number, Rendering[]>();
-    for (const step of trace.steps) {
-      const frame = step.stack.at(-1);
+    for (let i = 0; i <= stepIndex; i++) {
+      const step = trace.steps[i];
+      const frame = step?.stack.at(-1);
       if (frame) map.set(frame.line_number, step.renderings);
     }
     return map;
-  }, [trace.steps]);
+  }, [trace.steps, stepIndex]);
 
   const hidden = new Set(trace.hidden_line_numbers[path] ?? []);
 
