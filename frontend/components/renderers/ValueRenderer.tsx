@@ -68,13 +68,17 @@ function renderValue(value: Value, depth: number): React.ReactNode {
 
   if (TENSOR_TYPES.has(value.type) || value.type.startsWith("numpy.")) {
     if ("shape" in value && Array.isArray(value.shape)) {
-      return (
-        <TensorView
-          shape={value.shape as number[]}
-          dtype={(value as { dtype?: string }).dtype}
-          contents={value.contents}
-        />
-      );
+      const dtype = (value as { dtype?: string }).dtype;
+      if (dtype !== "object") {
+        return (
+          <TensorView
+            shape={value.shape as number[]}
+            dtype={dtype}
+            contents={value.contents}
+          />
+        );
+      }
+      // object-dtype arrays have Value[] contents — fall through to ListValue below
     }
     if (isPrimitive(value)) {
       return <span className="value-num">{formatNumber(value.contents as number)}</span>;

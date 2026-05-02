@@ -221,7 +221,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/5e/73/e01e4c5e11ad0494f
 
 [[package]]
 name = "lectrace"
-version = "1.1.0"
+version = "1.1.4"
 source = { editable = "." }
 
 [package.optional-dependencies]

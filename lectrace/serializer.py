@@ -78,6 +78,13 @@ def serialize(value: Any, depth: int = 0) -> dict:
 
     if (np := _lazy("numpy")) is not None:
         if isinstance(value, np.ndarray):
+            if value.dtype.kind == "O":  # object array: recurse into elements
+                return {
+                    "type": t,
+                    "dtype": str(value.dtype),
+                    "shape": list(value.shape),
+                    "contents": [serialize(v, depth + 1) for v in value.flat],
+                }
             return {
                 "type": t,
                 "dtype": str(value.dtype),
