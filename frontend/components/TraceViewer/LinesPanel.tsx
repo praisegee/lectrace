@@ -65,6 +65,8 @@ export function LinesPanel({
   const entryDefRef = useCallback((el: HTMLElement | null) => {
     if (!el) return;
     el.scrollIntoView({ behavior: "instant", block: "start" });
+    const container = el.closest(".viewer-code");
+    if (container) container.scrollTop -= 80;
   }, []);
 
   let prevVisibleLn = 0;
