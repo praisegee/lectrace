@@ -473,11 +473,10 @@ body.resizing {
 }
 
 .data-table th {
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  color: var(--color-text);
   padding: 9px 16px;
   background: white;
   border-bottom: 2px solid var(--color-border);
