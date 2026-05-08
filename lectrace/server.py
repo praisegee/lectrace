@@ -20,7 +20,7 @@ def serve(files: list[Path] | None = None, port: int = 7000) -> None:
     _watch_and_rebuild(lecture_files, output)
 
     handler = _make_handler(output)
-    server = http.server.HTTPServer(("", port), handler)
+    server = http.server.ThreadingHTTPServer(("", port), handler)
 
     url = f"http://localhost:{port}"
     print(f"\n  Serving at {url}")
@@ -62,6 +62,12 @@ def _make_handler(root: Path):
             super().__init__(*args, directory=str(root), **kwargs)
 
         def log_message(self, fmt, *args):
-            pass  # suppress request logs
+            pass
+
+        def handle_error(self, request, client_address):
+            import sys
+            if issubclass(sys.exc_info()[0], BrokenPipeError):
+                return
+            super().handle_error(request, client_address)
 
     return Handler
