@@ -129,6 +129,18 @@ def table(
     except ImportError:
         pass
 
+    try:
+        import numpy as np  # type: ignore[import-untyped]
+
+        if isinstance(rows, np.ndarray):
+            if rows.ndim != 2:
+                raise ValueError(
+                    f"table() requires a 2-D array; got shape {rows.shape}"
+                )
+            rows = rows.tolist()
+    except ImportError:
+        pass
+
     rows = list(rows)
 
     if rows and isinstance(rows[0], dict):

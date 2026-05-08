@@ -158,6 +158,19 @@ def test_numpy_array_rows():
     )
     assert r.data["rows"][0][0] == 1 and type(r.data["rows"][0][0]) is int
 
+def test_numpy_2d_array():
+    np = pytest.importorskip("numpy")
+    arr = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    r = _table(arr, headers=["a", "b", "c"])
+    assert r.data["headers"] == ["a", "b", "c"]
+    assert len(r.data["rows"]) == 2
+    assert r.data["rows"][0] == [1.0, 2.0, 3.0]
+
+def test_numpy_1d_array_raises():
+    np = pytest.importorskip("numpy")
+    with pytest.raises(ValueError, match="2-D"):
+        table(np.array([1, 2, 3]), headers=["x"])
+
 
 # ── pandas DataFrame (skipped if pandas not installed) ────────────────────────
 
