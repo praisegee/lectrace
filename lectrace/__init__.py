@@ -5,12 +5,13 @@ from lectrace.renderings import (
     note,
     plot,
     system_text,
+    table,
     text,
     url_reference,
     video,
 )
 
-__version__ = "1.1.15"
+__version__ = "1.1.16"
 
 __all__ = [
     "text",
@@ -19,6 +20,7 @@ __all__ = [
     "link",
     "plot",
     "note",
+    "table",
     "system_text",
     "url_reference",
     "Reference",

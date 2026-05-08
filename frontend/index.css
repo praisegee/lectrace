@@ -440,6 +440,84 @@ body.resizing {
   line-height: 1.55;
 }
 
+/* ─── Data table (table() rendering) ─── */
+
+.table-view {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.table-caption {
+  font-size: 15px;
+  color: var(--color-muted);
+  font-style: italic;
+  font-family: var(--font-ui);
+  margin: 0;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.data-table {
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  width: 100%;
+  min-width: max-content;
+}
+
+.data-table th {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  padding: 8px 14px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  text-align: left;
+  user-select: none;
+}
+
+.data-table th.align-right { text-align: right; }
+
+.data-table td {
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.data-table tbody tr:nth-child(even) td { background: var(--color-surface); }
+
+.data-table tbody tr:hover td {
+  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+}
+
+.data-table td.align-right { text-align: right; }
+
+.table-cell-num {
+  color: #0550ae;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-code);
+  font-size: 15px;
+}
+
+.table-cell-bool {
+  color: #8250df;
+  font-family: var(--font-code);
+  font-size: 15px;
+}
+
+.table-cell-null { color: var(--color-muted); }
+
 /* ─── Environment panel ─── */
 
 /* Shared label style used by call stack and variables header */

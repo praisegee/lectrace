@@ -2,11 +2,12 @@ import { useMemo, useCallback } from "react";
 import hljs from "highlight.js/lib/core";
 import python from "highlight.js/lib/languages/python";
 import "highlight.js/styles/github.css";
-import type { Trace, Rendering } from "../../types/trace";
+import type { Trace, Rendering, TableData } from "../../types/trace";
 import { computeLinesToShow } from "../../hooks/useNavigation";
 import { MarkdownView } from "../renderers/MarkdownView";
 import { ExternalLinkCard } from "../renderers/ExternalLinkCard";
 import { PlotView } from "../renderers/PlotView";
+import { TableView } from "../renderers/TableView";
 
 hljs.registerLanguage("python", python);
 
@@ -152,6 +153,8 @@ function renderRendering(r: Rendering, onGotoLocation: (path: string, ln: number
       return <PlotView spec={r.data} style={r.style} />;
     case "note":
       return <div className="note-callout">{r.data}</div>;
+    case "table":
+      return <TableView data={r.data as TableData} style={r.style} />;
     default: {
       const fallback = r as { data?: string; style?: React.CSSProperties };
       return <span style={fallback.style}>{fallback.data}</span>;

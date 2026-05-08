@@ -3,7 +3,7 @@
 Import rendering functions from `lectrace`:
 
 ```python
-from lectrace import text, image, video, link, plot, note, system_text, Reference
+from lectrace import text, image, video, link, plot, note, table, system_text, Reference
 ```
 
 Renderings are attached to the step where the call appears. When that step is active in the viewer, the rendering replaces the code line with its visual output.
@@ -217,6 +217,64 @@ Notes appear inline as callout boxes with a left accent border. Use them for spe
 
 ```python
 note(message: str) -> None
+```
+
+---
+
+## table()
+
+Display structured data as a formatted table.
+
+```python
+# List of dicts — keys become headers automatically
+table([
+    {"name": "quicksort",  "avg": "O(n log n)", "worst": "O(n²)",      "space": "O(log n)"},
+    {"name": "mergesort",  "avg": "O(n log n)", "worst": "O(n log n)", "space": "O(n)"},
+    {"name": "heapsort",   "avg": "O(n log n)", "worst": "O(n log n)", "space": "O(1)"},
+    {"name": "timsort",    "avg": "O(n log n)", "worst": "O(n log n)", "space": "O(n)"},
+])
+```
+
+With an optional caption:
+
+```python
+table(
+    [{"epoch": 1, "loss": 2.31, "acc": 0.42},
+     {"epoch": 2, "loss": 1.87, "acc": 0.61},
+     {"epoch": 3, "loss": 1.42, "acc": 0.74}],
+    caption="Training metrics",
+)
+```
+
+From a list of lists — `headers` is required:
+
+```python
+table(
+    [[1, 0.92, "cat"], [2, 0.87, "dog"], [3, 0.73, "bird"]],
+    headers=["id", "confidence", "label"],
+)
+```
+
+From a pandas DataFrame:
+
+```python
+import pandas as pd
+
+df = pd.DataFrame({"city": ["London", "Tokyo", "NYC"], "pop_m": [9.0, 13.9, 8.3]})
+table(df, caption="City populations (millions)")
+```
+
+Column alignment is inferred automatically — numeric columns right-align, text columns left-align. Null/`None` cells render as `—`.
+
+**Signature:**
+
+```python
+table(
+    rows: list[dict] | list[list] | DataFrame,
+    headers: list[str] | None = None,
+    caption: str | None = None,
+    style: dict | None = None,
+) -> None
 ```
 
 ---

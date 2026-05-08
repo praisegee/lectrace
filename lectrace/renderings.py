@@ -113,6 +113,50 @@ def plot(spec: object) -> None:
     _store().append(Rendering(type="plot", data=spec))  # type: ignore[arg-type]
 
 
+def table(
+    rows: "list[dict] | list[list]",
+    headers: "list[str] | None" = None,
+    caption: "str | None" = None,
+    style: "dict | None" = None,
+) -> None:
+    try:
+        import pandas as pd  # type: ignore[import-untyped]
+
+        if isinstance(rows, pd.DataFrame):
+            if headers is None:
+                headers = [str(c) for c in rows.columns]
+            rows = [list(r) for r in rows.itertuples(index=False, name=None)]
+    except ImportError:
+        pass
+
+    rows = list(rows)
+
+    if rows and isinstance(rows[0], dict):
+        if headers is None:
+            seen: dict[str, None] = {}
+            for row in rows:
+                seen.update(dict.fromkeys(row.keys()))
+            headers = list(seen)
+        rows = [[row.get(h) for h in headers] for row in rows]  # type: ignore[union-attr]
+    elif rows and isinstance(rows[0], (list, tuple)):
+        if headers is None:
+            raise ValueError("table() requires headers= when rows are lists")
+    elif rows:
+        raise TypeError(
+            f"table() expects list[dict], list[list], or a DataFrame; "
+            f"got list[{type(rows[0]).__name__}]"
+        )
+
+    data: dict = {
+        "headers": list(headers) if headers else [],
+        "rows": [[_cell(v) for v in row] for row in rows],
+    }
+    if caption is not None:
+        data["caption"] = caption
+
+    _store().append(Rendering(type="table", data=data, style=style or None))
+
+
 def note(message: str) -> None:
     _store().append(Rendering(type="note", data=textwrap.dedent(message).strip()))
 
@@ -133,6 +177,34 @@ def url_reference(url: str, **kwargs) -> Reference:
         except Exception:
             pass
     return Reference(url=url, **kwargs)
+
+
+def _cell(v: object) -> "str | int | float | bool | None":
+    if v is None:
+        return None
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, int):
+        return v
+    if isinstance(v, float):
+        import math
+
+        return str(v) if (math.isnan(v) or math.isinf(v)) else v
+    try:
+        import numpy as np  # type: ignore[import-untyped]
+
+        if isinstance(v, np.bool_):
+            return bool(v)
+        if isinstance(v, np.integer):
+            return int(v)
+        if isinstance(v, np.floating):
+            import math
+
+            f = float(v)
+            return str(f) if (math.isnan(f) or math.isinf(f)) else f
+    except ImportError:
+        pass
+    return str(v)
 
 
 def _is_url(s: str) -> bool:

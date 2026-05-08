@@ -45,13 +45,20 @@ export type Value =
   | { type: string; contents: Record<string, Value> }
   | { type: string; contents: string | number | boolean | null };
 
+export interface TableData {
+  headers: string[];
+  rows: (string | number | boolean | null)[][];
+  caption?: string;
+}
+
 export type Rendering =
   | { type: "markdown"; data: string; style?: React.CSSProperties }
   | { type: "image"; data: string; style?: React.CSSProperties }
   | { type: "video"; data: string; style?: React.CSSProperties }
   | { type: "link"; data?: string; style?: React.CSSProperties; internal_link?: CodeLocation; external_link?: ExternalReference }
   | { type: "plot"; data: unknown; style?: React.CSSProperties }
-  | { type: "note"; data: string };
+  | { type: "note"; data: string }
+  | { type: "table"; data: TableData; style?: React.CSSProperties };
 
 export interface CodeLocation {
   path: string;
