@@ -20,7 +20,7 @@ from lectrace.directives import (
     parse,
 )
 from lectrace.files import relativize
-from lectrace.renderings import Rendering, flush
+from lectrace.renderings import Rendering, _set_active, flush
 from lectrace.serializer import serialize
 
 
@@ -76,10 +76,19 @@ def _statement_lines(source_text: str) -> set[int]:
 
 
 _COMPOUND_STMTS = (
-    ast.For, ast.AsyncFor, ast.While, ast.If,
-    ast.With, ast.AsyncWith, ast.Try, ast.TryStar,
-    ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef,
+    ast.For,
+    ast.AsyncFor,
+    ast.While,
+    ast.If,
+    ast.With,
+    ast.AsyncWith,
+    ast.Try,
+    ast.TryStar,
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.ClassDef,
 )
+
 
 def _statement_spans(source_text: str) -> dict[int, int]:
     """Return mapping of statement start line → end line.
@@ -104,6 +113,13 @@ def _statement_spans(source_text: str) -> dict[int, int]:
 
 def execute(source: Path, inspect_all: bool = False) -> Trace:
     import importlib.util
+
+    try:
+        import matplotlib  # type: ignore
+
+        matplotlib.use("Agg")
+    except ImportError:
+        pass
 
     steps: list[Step] = []
     visible: set[str] = set()
@@ -271,6 +287,7 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             print(f"\nModule load error: {error.exception_type}: {error.message}")
 
     if error is None:
+        _set_active(True)
         sys.settrace(on_line)
         try:
             if hasattr(module, "main"):
@@ -285,6 +302,7 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
                 print(f"\nExecution error: {error.exception_type}: {error.message}")
         finally:
             sys.settrace(None)
+            _set_active(False)
 
     sys.modules.pop("_lecture", None)
     if _added_to_path and source_dir in sys.path:

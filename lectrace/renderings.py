@@ -42,6 +42,15 @@ def flush() -> list[Rendering]:
     return result
 
 
+def _in_lectrace() -> bool:
+    return getattr(_local, "active", False)
+
+
+def _set_active(flag: bool) -> None:
+    _local.active = flag
+
+
+
 def text(message: str, style: dict | None = None, verbatim: bool = False) -> None:
     message = textwrap.dedent(message).strip()
     extra: dict = {"fontFamily": "monospace", "whiteSpace": "pre"} if verbatim else {}
@@ -93,19 +102,26 @@ def link(
 
 def plot(spec: object) -> None:
     try:
-        import matplotlib.figure
+        import matplotlib.pyplot as plt
 
-        if isinstance(spec, matplotlib.figure.Figure):
+        fig: plt.Figure | None = None
+        if isinstance(spec, plt.Figure):
+            fig = spec
+        elif isinstance(spec, plt.Axes):
+            fig = spec.get_figure()
+
+        if fig is not None:
+            if not _in_lectrace():
+                return
+
             import base64
             import io
 
             buf = io.BytesIO()
-            spec.savefig(buf, format="svg", bbox_inches="tight")
+            fig.savefig(buf, format="svg", bbox_inches="tight")
             buf.seek(0)
             data = "data:image/svg+xml;base64," + base64.b64encode(buf.read()).decode()
-            import matplotlib.pyplot as plt
-
-            plt.close(spec)
+            plt.close(fig)
             _store().append(Rendering(type="image", data=data))
             return
     except ImportError:

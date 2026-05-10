@@ -154,20 +154,30 @@ link(
 
 ## plot()
 
-Embed a chart. Pass a **matplotlib `Figure`** or a raw [Vega-Lite](https://vega.github.io/vega-lite/) spec dict.
-
-### matplotlib (recommended)
+Embed a chart in the **lectrace browser viewer**. This call is a no-op when the script is run directly — use `plt.show()` in your script for the standalone matplotlib window.
 
 ```python
 import matplotlib.pyplot as plt
+import lectrace
 
-fig, ax = plt.subplots()
-ax.bar(["A", "B", "C"], [3, 7, 2])
-ax.set_title("Distribution")
-plot(fig)
+def main():
+    fig, ax = plt.subplots()
+    ax.bar(["A", "B", "C"], [3, 7, 2])
+    lectrace.plot(fig)   # shows in lectrace viewer
+    plt.show()           # shows matplotlib window when run as a standalone script
 ```
 
-Any matplotlib chart type works — line, scatter, histogram, heatmap, subplots, etc. The figure is rendered as a crisp SVG and the Figure object is closed automatically.
+### matplotlib
+
+Pass a `Figure` or an `Axes` object — both are accepted:
+
+```python
+fig, ax = plt.subplots()
+ax.plot([1, 2, 3], [4, 5, 6])
+plot(fig)   # or: plot(ax)
+```
+
+Any matplotlib chart type works — line, scatter, histogram, heatmap, subplots, etc. The figure is rendered as a crisp SVG and closed automatically after capture.
 
 ### Vega-Lite spec
 
@@ -190,7 +200,7 @@ plot({
 **Signature:**
 
 ```python
-plot(spec: Figure | dict) -> None
+plot(spec: Figure | Axes | dict) -> None
 ```
 
 ---
