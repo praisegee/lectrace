@@ -71,7 +71,7 @@ This is especially useful for utility functions, recursive helpers, or library c
 
 ## @hide
 
-Hide this line from the viewer entirely. The line still executes; it just never appears on screen.
+Hide this line from the source code panel. The line still executes and still produces a trace step — it just doesn't appear in the code view.
 
 ```python
 assert isinstance(root, Node)  # @hide  ← sanity check, not relevant to lecture
@@ -79,6 +79,40 @@ logging.debug("here")          # @hide
 ```
 
 Use it for assertions, debug prints, and any code that is correct but distracting.
+
+---
+
+## @invisible
+
+Completely remove this line from the viewer — no trace step is recorded and the line is hidden from the source code panel. The line still executes normally; any variables assigned on it are available to subsequent steps.
+
+```python
+import matplotlib.pyplot as plt
+from lectrace import text, plot
+
+def main():
+    text("# My Plot")
+
+    x = [1, 2, 3, 4, 5]
+    y = [1, 4, 9, 16, 25]
+
+    ax = plt.subplot()     # @invisible
+    ax.scatter(x, y)       # @invisible
+    ax.set_title("y = x²") # @invisible
+    plot(ax)
+    plt.show()             # @invisible
+```
+
+The viewer steps are only `text(...)`, `x = ...`, `y = ...`, `plot(ax)`. The matplotlib setup lines are completely absent.
+
+| Directive | Source panel | Trace step |
+|---|---|---|
+| *(none)* | visible | yes |
+| `@hide` | hidden | yes |
+| `@invisible` | hidden | no |
+
+!!! warning
+    Avoid `@invisible` on `plot()`, `text()`, or any other lectrace rendering call — the rendering will be silently discarded since there is no step to attach it to.
 
 ---
 
