@@ -134,3 +134,44 @@ def test_bare_inspect_shows_all_locals():
     all_envs = {k: v for s in trace.steps for k, v in s.env.items()}
     assert "a" in all_envs
     assert "b" in all_envs
+
+
+def test_invisible_line_creates_no_step():
+    path = _write("""
+        def main():
+            x = 1
+            y = 2  # @invisible
+            z = 3
+    """)
+    trace = execute(path)
+    source_lines = [s.stack[-1].source_line for s in trace.steps]
+    assert not any("y = 2" in l for l in source_lines)
+
+
+def test_invisible_line_is_hidden():
+    path = _write("""
+        def main():
+            x = 1
+            y = 2  # @invisible
+            z = 3
+    """)
+    trace = execute(path)
+    rel_path = list(trace.hidden_line_numbers.keys())[0]
+    hidden = trace.hidden_line_numbers[rel_path]
+    src_lines = list(trace.files.values())[0].split("\n")
+    invisible_lineno = next(
+        i for i, l in enumerate(src_lines, start=1) if "y = 2" in l
+    )
+    assert invisible_lineno in hidden
+
+
+def test_invisible_variable_visible_in_next_step():
+    path = _write("""
+        def main():
+            y = 2  # @invisible
+            z = y + 1  # @inspect z
+    """)
+    trace = execute(path)
+    env_steps = [s for s in trace.steps if "z" in s.env]
+    assert env_steps
+    assert env_steps[-1].env["z"]["contents"] == 3

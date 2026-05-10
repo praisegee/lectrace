@@ -6,8 +6,9 @@ INSPECT = "@inspect"
 CLEAR = "@clear"
 STEPOVER = "@stepover"
 HIDE = "@hide"
+INVISIBLE = "@invisible"
 
-_KNOWN = {INSPECT, CLEAR, STEPOVER, HIDE}
+_KNOWN = {INSPECT, CLEAR, STEPOVER, HIDE, INVISIBLE}
 
 
 @dataclass(frozen=True)

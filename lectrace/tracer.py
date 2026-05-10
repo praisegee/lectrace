@@ -13,6 +13,7 @@ from lectrace import __version__
 from lectrace.directives import (
     HIDE,
     INSPECT,
+    INVISIBLE,
     STEPOVER,
     clear_vars,
     has,
@@ -210,6 +211,10 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         if _under_stepover(stack, stepovers):
             return on_line
 
+        if has(directives, INVISIBLE):
+            flush()
+            return on_line
+
         # Bare @inspect on a non-def line: inspect all locals here and in any direct call.
         # Bare @inspect on a def line: already handled statically via inspect_functions.
         bare_inspect = has(directives, INSPECT) and not inspect_vars(directives)
@@ -368,7 +373,8 @@ def _hidden_lines(files: dict[str, str]) -> dict[str, list[int]]:
     for path, contents in files.items():
         hidden: set[int] = set()
         for i, line in enumerate(contents.split("\n"), start=1):
-            if has(parse(line), HIDE):
+            directives = parse(line)
+            if has(directives, HIDE) or has(directives, INVISIBLE):
                 hidden.add(i)
         hidden |= _render_interior_lines(contents)
         result[path] = sorted(hidden)
