@@ -25,6 +25,9 @@ export function TraceViewer({ onToggleSidebar }: Props) {
   const { stepForward, stepBackward, stepOverForward, stepOverBackward, stepUp } =
     useNavigation(trace, stepParam, setStep);
 
+  const [pinnedView, setPinnedView] = useState<{ path: string; line: number } | null>(null);
+  useEffect(() => { setPinnedView(null); }, [stepParam]);
+
   const rawMode = params.get("raw") === "1";
   const animateMode = params.get("animate") !== "0";
   const hideEnv = params.get("hideEnv") === "1";
@@ -109,6 +112,9 @@ export function TraceViewer({ onToggleSidebar }: Props) {
   const currentPath = frame?.path ?? Object.keys(trace.files)[0];
   const currentLine = frame?.line_number ?? 1;
 
+  const displayPath = pinnedView?.path ?? currentPath;
+  const displayLine = pinnedView?.line ?? currentLine;
+
   const entryDefLine = (() => {
     if (stepIndex !== 0) return null;
     const fn = trace.steps[0]?.stack.at(-1)?.function_name;
@@ -135,14 +141,15 @@ export function TraceViewer({ onToggleSidebar }: Props) {
   };
 
   const gotoLocation = (path: string, ln: number) => {
-    setParams((p) => {
-      const i = trace.steps.findIndex((s) => {
-        const f = s.stack.at(-1);
-        return f?.path === path && f.line_number === ln;
-      });
-      if (i >= 0) p.set("step", String(i));
-      return p;
+    const i = trace.steps.findIndex((s) => {
+      const f = s.stack.at(-1);
+      return f?.path === path && f.line_number === ln;
     });
+    if (i >= 0) {
+      setStep(i);
+    } else {
+      setPinnedView({ path, line: ln });
+    }
   };
 
   const envVarCount = Object.keys(
@@ -179,8 +186,8 @@ export function TraceViewer({ onToggleSidebar }: Props) {
         >
           <LinesPanel
             trace={trace}
-            path={currentPath}
-            lineNumber={currentLine}
+            path={displayPath}
+            lineNumber={displayLine}
             stepIndex={stepIndex}
             rawMode={rawMode}
             animateMode={animateMode}
