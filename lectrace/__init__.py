@@ -11,7 +11,7 @@ from lectrace.renderings import (
     video,
 )
 
-__version__ = "1.1.25"
+__version__ = "1.1.26"
 
 __all__ = [
     "text",
