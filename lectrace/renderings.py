@@ -59,15 +59,25 @@ def text(message: str, style: dict | None = None, verbatim: bool = False) -> Non
 
 
 def image(url: str, style: dict | None = None, width: int | str | None = None) -> None:
+    import base64
+    import mimetypes
+
     s = {**(style or {}), **({"width": width} if width is not None else {})} or None
-    path = str(cached(url, "image")) if _is_url(url) else _local_file(url)
-    _store().append(Rendering(type="image", data=path, style=s))
+    file_path = cached(url, "image") if _is_url(url) else Path(_local_file(url))
+    mime = mimetypes.guess_type(url)[0] or "image/png"
+    data = "data:" + mime + ";base64," + base64.b64encode(file_path.read_bytes()).decode()
+    _store().append(Rendering(type="image", data=data, style=s))
 
 
 def video(url: str, style: dict | None = None, width: int | str | None = None) -> None:
+    import base64
+    import mimetypes
+
     s = {**(style or {}), **({"width": width} if width is not None else {})} or None
-    path = str(cached(url, "video")) if _is_url(url) else _local_file(url)
-    _store().append(Rendering(type="video", data=path, style=s))
+    file_path = cached(url, "video") if _is_url(url) else Path(_local_file(url))
+    mime = mimetypes.guess_type(url)[0] or "video/mp4"
+    data = "data:" + mime + ";base64," + base64.b64encode(file_path.read_bytes()).decode()
+    _store().append(Rendering(type="video", data=data, style=s))
 
 
 def link(
