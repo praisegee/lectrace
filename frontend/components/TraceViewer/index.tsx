@@ -190,7 +190,7 @@ export function TraceViewer({ onToggleSidebar }: Props) {
             lineNumber={displayLine}
             stepIndex={stepIndex}
             rawMode={rawMode}
-            animateMode={animateMode}
+            animateMode={animateMode && pinnedView === null}
             entryDefLine={entryDefLine}
             onGotoLine={gotoLine}
             onGotoLocation={gotoLocation}
