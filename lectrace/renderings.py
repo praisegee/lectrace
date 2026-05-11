@@ -50,7 +50,6 @@ def _set_active(flag: bool) -> None:
     _local.active = flag
 
 
-
 def text(message: str, style: dict | None = None, verbatim: bool = False) -> None:
     message = textwrap.dedent(message).strip()
     extra: dict = {"fontFamily": "monospace", "whiteSpace": "pre"} if verbatim else {}
@@ -65,7 +64,9 @@ def image(url: str, style: dict | None = None, width: int | str | None = None) -
     s = {**(style or {}), **({"width": width} if width is not None else {})} or None
     file_path = cached(url, "image") if _is_url(url) else Path(_local_file(url))
     mime = mimetypes.guess_type(url)[0] or "image/png"
-    data = "data:" + mime + ";base64," + base64.b64encode(file_path.read_bytes()).decode()
+    data = (
+        "data:" + mime + ";base64," + base64.b64encode(file_path.read_bytes()).decode()
+    )
     _store().append(Rendering(type="image", data=data, style=s))
 
 
@@ -76,7 +77,9 @@ def video(url: str, style: dict | None = None, width: int | str | None = None) -
     s = {**(style or {}), **({"width": width} if width is not None else {})} or None
     file_path = cached(url, "video") if _is_url(url) else Path(_local_file(url))
     mime = mimetypes.guess_type(url)[0] or "video/mp4"
-    data = "data:" + mime + ";base64," + base64.b64encode(file_path.read_bytes()).decode()
+    data = (
+        "data:" + mime + ";base64," + base64.b64encode(file_path.read_bytes()).decode()
+    )
     _store().append(Rendering(type="video", data=data, style=s))
 
 
@@ -112,7 +115,7 @@ def link(
 
 def plot(spec: object) -> None:
     try:
-        import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt  # type: ignore
 
         fig: plt.Figure | None = None
         if isinstance(spec, plt.Figure):
