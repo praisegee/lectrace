@@ -91,3 +91,22 @@ def test_clear_removes_variable_from_env():
     assert steps_with_x
     last = steps_with_x[-1]
     assert last.env["x"] is None
+
+
+def test_hash_inside_string_is_not_a_directive():
+    assert parse('msg = "use #@stepover to skip"') == []
+
+
+def test_hash_inside_string_does_not_shadow_real_directive():
+    directives = parse('url = "http://x.com/#frag"  # @inspect url')
+    assert inspect_vars(directives) == ["url"]
+
+
+def test_directive_on_indented_line():
+    directives = parse("    x = 42  # @inspect x")
+    assert inspect_vars(directives) == ["x"]
+
+
+def test_unparsable_fragment_falls_back_to_split():
+    directives = parse('d = {"a": 1,  # @inspect d')
+    assert inspect_vars(directives) == ["d"]

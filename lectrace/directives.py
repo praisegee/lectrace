@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import io
+import tokenize
 from dataclasses import dataclass
 
 INSPECT = "@inspect"
@@ -17,10 +19,30 @@ class Directive:
     args: list[str]
 
 
-def parse(line: str) -> list[Directive]:
+def _comment(line: str) -> str:
+    """The line's comment text, or "" if it has none.
+
+    Tokenizing avoids treating a `#` inside a string literal as a comment,
+    which would turn `msg = "use #@stepover"` into a live directive.
+    """
     if "#" not in line:
+        return ""
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(line).readline):
+            if token.type == tokenize.COMMENT:
+                return token.string[1:]
+    except (tokenize.TokenError, IndentationError, SyntaxError):
+        # Continuation lines and fragments don't tokenize on their own; fall
+        # back to the naive split rather than dropping the directive.
+        return line.split("#", 1)[1]
+    return ""
+
+
+def parse(line: str) -> list[Directive]:
+    comment = _comment(line)
+    if not comment:
         return []
-    tokens = line.split("#", 1)[1].split()
+    tokens = comment.split()
     directives: list[Directive] = []
     for token in tokens:
         if token.startswith("@"):
