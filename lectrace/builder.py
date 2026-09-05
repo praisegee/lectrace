@@ -84,7 +84,12 @@ def build(
         cache_key = str(lecture)
         cached_entry = cache.get(cache_key, {})
 
-        if incremental and cached_entry.get("hash") == src_hash:
+        trace_path = traces_dir / f"{lecture.stem}.json"
+        if (
+            incremental
+            and cached_entry.get("hash") == src_hash
+            and trace_path.exists()
+        ):
             index_entries.append(cached_entry["index_entry"])
             print(f"  {lecture.name} :: up to date")
             continue
@@ -94,8 +99,7 @@ def build(
         trace = execute(lecture)
         elapsed = time.monotonic() - t0
 
-        out_path = traces_dir / f"{lecture.stem}.json"
-        with open(out_path, "w", encoding="utf-8") as f:
+        with open(trace_path, "w", encoding="utf-8") as f:
             json.dump(asdict(trace), f, indent=2, cls=_TraceEncoder)
 
         entry = {
@@ -108,6 +112,12 @@ def build(
         index_entries.append(entry)
         cache[cache_key] = {"hash": src_hash, "index_entry": entry}
         print(f"     {len(trace.steps)} steps in {elapsed:.1f}s")
+
+    if files is not None:
+        # Partial build: keep lectures we weren't asked to rebuild, so that
+        # `lectrace build one.py` (and the serve watcher) don't wipe the rest.
+        index_entries.extend(_surviving_entries(traces_dir, index_entries))
+        index_entries.sort(key=lambda e: e["id"])
 
     with open(traces_dir / "index.json", "w", encoding="utf-8") as f:
         json.dump({"version": "2", "traces": index_entries}, f, indent=2)
@@ -122,6 +132,26 @@ def build(
     cache_path.write_text(json.dumps(cache, indent=2))
     noun = "lecture" if len(index_entries) == 1 else "lectures"
     print(f"\n  done :: {len(index_entries)} {noun} ready in {output}/")
+
+
+def _surviving_entries(traces_dir: Path, built: list[dict]) -> list[dict]:
+    """Index entries from a previous build whose trace file is still on disk."""
+    index_path = traces_dir / "index.json"
+    if not index_path.exists():
+        return []
+    try:
+        previous = json.loads(index_path.read_text())["traces"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return []
+
+    built_ids = {e["id"] for e in built}
+    return [
+        entry
+        for entry in previous
+        if isinstance(entry, dict)
+        and entry.get("id") not in built_ids
+        and (traces_dir / f"{entry.get('id')}.json").exists()
+    ]
 
 
 def _sha256(path: Path) -> str:
