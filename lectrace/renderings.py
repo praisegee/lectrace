@@ -161,6 +161,8 @@ def table(
     headers: "list[str] | None" = None,
     caption: "str | None" = None,
     style: "dict | None" = None,
+    head: "int | None" = 5,
+    tail: "int | None" = 5,
 ) -> None:
     try:
         import pandas as pd  # type: ignore[import-untyped]
@@ -204,12 +206,42 @@ def table(
 
     data: dict = {
         "headers": list(headers) if headers else [],
-        "rows": [[_cell(v) for v in row] for row in rows],
+        "rows": _elide(
+            [[_cell(v) for v in row] for row in rows],
+            head,
+            tail,
+            len(headers) if headers else 0,
+        ),
     }
     if caption is not None:
         data["caption"] = caption
 
     _store().append(Rendering(type="table", data=data, style=style or None))
+
+
+ELLIPSIS = "..."
+
+
+def _elide(rows: list[list], head: int | None, tail: int | None, width: int) -> list[list]:
+    """Keep the first `head` and last `tail` rows, joined by a row of ellipses.
+
+    `None` means "no limit" on that side. Rows are returned untouched when
+    nothing would be hidden, so a 10-row table under the 5/5 default still
+    shows all ten.
+    """
+    if (head is not None and head < 0) or (tail is not None and tail < 0):
+        raise ValueError("table() head= and tail= must not be negative")
+    if head is None and tail is None:
+        return rows
+
+    n = len(rows)
+    h = n if head is None else head
+    t = n if tail is None else tail
+    if n <= h + t:
+        return rows
+
+    gap = [ELLIPSIS] * (width or (len(rows[0]) if rows else 0))
+    return rows[:h] + [gap] + (rows[n - t :] if t else [])
 
 
 def note(message: str) -> None:
