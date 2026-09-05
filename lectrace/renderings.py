@@ -156,14 +156,35 @@ def plot(spec: object) -> None:
     _store().append(Rendering(type="plot", data=spec))  # type: ignore[arg-type]
 
 
+ELLIPSIS = "..."
+DEFAULT_ROWS = 5
+
+
+class _Auto:
+    """Sentinel for table() head=/tail=: elide bulk inputs, leave lists alone."""
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:
+        return "auto"
+
+
+AUTO = _Auto()
+
+
 def table(
     rows: list[dict] | list[list],
     headers: list[str] | None = None,
     caption: str | None = None,
     style: dict | None = None,
-    head: int | None = 5,
-    tail: int | None = 5,
+    head: int | None | _Auto = AUTO,
+    tail: int | None | _Auto = AUTO,
 ) -> None:
+    # DataFrames and arrays can carry thousands of records, so they are elided
+    # by default. A hand-written list is deliberate, so it is left alone unless
+    # head= or tail= is passed explicitly.
+    bulk = False
+
     try:
         import pandas as pd  # type: ignore[import-untyped]
 
@@ -171,6 +192,7 @@ def table(
             if headers is None:
                 headers = [str(c) for c in rows.columns]
             rows = [list(r) for r in rows.itertuples(index=False, name=None)]
+            bulk = True
     except ImportError:
         pass
 
@@ -183,8 +205,15 @@ def table(
                     f"table() requires a 2-D array; got shape {rows.shape}"
                 )
             rows = rows.tolist()
+            bulk = True
     except ImportError:
         pass
+
+    explicit = head is not AUTO or tail is not AUTO
+    head = DEFAULT_ROWS if head is AUTO else head
+    tail = DEFAULT_ROWS if tail is AUTO else tail
+    if not bulk and not explicit:
+        head = tail = None
 
     rows = list(rows)
 
@@ -217,9 +246,6 @@ def table(
         data["caption"] = caption
 
     _store().append(Rendering(type="table", data=data, style=style or None))
-
-
-ELLIPSIS = "..."
 
 
 def _elide(rows: list[list], head: int | None, tail: int | None, width: int) -> list[list]:

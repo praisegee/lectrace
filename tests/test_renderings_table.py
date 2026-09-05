@@ -196,39 +196,65 @@ def test_dataframe_caption():
 
 
 # ── head / tail elision ──────────────────────────────────────────────────────
+#
+# Only DataFrames and arrays are elided by default; a hand-written list is
+# deliberate and is left alone unless head=/tail= is passed explicitly.
 
-def _rows(n):
+def _dicts(n):
     return [{"n": i, "sq": i * i} for i in range(n)]
 
 
-def test_long_table_shows_head_ellipsis_tail():
-    r = _table(_rows(20))
+def _frame(n):
+    pd = pytest.importorskip("pandas")
+    return pd.DataFrame({"n": range(n), "sq": [i * i for i in range(n)]})
+
+
+def test_plain_list_is_not_elided_by_default():
+    r = _table(_dicts(50))
+    assert len(r.data["rows"]) == 50
+    assert ["...", "..."] not in r.data["rows"]
+
+
+def test_list_of_lists_is_not_elided_by_default():
+    r = _table([[i, i] for i in range(50)], headers=["a", "b"])
+    assert len(r.data["rows"]) == 50
+
+
+def test_dataframe_is_elided_by_default():
+    r = _table(_frame(1000))
     rows = r.data["rows"]
     assert len(rows) == 11
     assert rows[:5] == [[i, i * i] for i in range(5)]
     assert rows[5] == ["...", "..."]
-    assert rows[6:] == [[i, i * i] for i in range(15, 20)]
+    assert rows[6:] == [[i, i * i] for i in range(995, 1000)]
 
 
-def test_exactly_head_plus_tail_is_not_elided():
-    r = _table(_rows(10))
-    assert len(r.data["rows"]) == 10
-    assert ["...", "..."] not in r.data["rows"]
-
-
-def test_one_over_the_limit_is_elided():
-    r = _table(_rows(11))
+def test_numpy_array_is_elided_by_default():
+    np = pytest.importorskip("numpy")
+    r = _table(np.arange(2000).reshape(1000, 2), headers=["a", "b"])
     assert len(r.data["rows"]) == 11
     assert r.data["rows"][5] == ["...", "..."]
 
 
-def test_short_table_is_untouched():
-    r = _table(_rows(3))
-    assert r.data["rows"] == [[0, 0], [1, 1], [2, 4]]
+def test_short_dataframe_is_untouched():
+    r = _table(_frame(10))
+    assert len(r.data["rows"]) == 10
+    assert ["...", "..."] not in r.data["rows"]
 
 
-def test_custom_head_and_tail():
-    r = _table(_rows(20), head=2, tail=3)
+def test_dataframe_one_over_the_limit_is_elided():
+    r = _table(_frame(11))
+    assert len(r.data["rows"]) == 11
+    assert r.data["rows"][5] == ["...", "..."]
+
+
+def test_dataframe_opts_out_with_none():
+    r = _table(_frame(50), head=None, tail=None)
+    assert len(r.data["rows"]) == 50
+
+
+def test_explicit_head_and_tail_apply_to_a_plain_list():
+    r = _table(_dicts(20), head=2, tail=3)
     rows = r.data["rows"]
     assert len(rows) == 6
     assert rows[:2] == [[0, 0], [1, 1]]
@@ -236,46 +262,45 @@ def test_custom_head_and_tail():
     assert rows[3:] == [[17, 289], [18, 324], [19, 361]]
 
 
-def test_none_disables_elision():
-    r = _table(_rows(50), head=None, tail=None)
-    assert len(r.data["rows"]) == 50
+def test_explicit_head_alone_uses_default_tail():
+    r = _table(_dicts(20), head=3)
+    rows = r.data["rows"]
+    assert len(rows) == 9
+    assert rows[3] == ["...", "..."]
 
 
-def test_none_head_keeps_every_row():
-    r = _table(_rows(50), head=None)
-    assert len(r.data["rows"]) == 50
+def test_explicit_tail_alone_uses_default_head():
+    r = _table(_dicts(20), tail=2)
+    rows = r.data["rows"]
+    assert len(rows) == 8
+    assert rows[5] == ["...", "..."]
 
 
 def test_tail_zero_puts_ellipsis_last():
-    r = _table(_rows(20), head=3, tail=0)
+    r = _table(_dicts(20), head=3, tail=0)
     rows = r.data["rows"]
     assert len(rows) == 4
     assert rows[-1] == ["...", "..."]
 
 
 def test_head_zero_puts_ellipsis_first():
-    r = _table(_rows(20), head=0, tail=3)
+    r = _table(_dicts(20), head=0, tail=3)
     rows = r.data["rows"]
     assert len(rows) == 4
     assert rows[0] == ["...", "..."]
 
 
 def test_ellipsis_row_matches_column_count():
-    r = _table([{"a": 1, "b": 2, "c": 3}] * 20)
-    assert r.data["rows"][5] == ["...", "..."] + ["..."]
-    assert len(r.data["rows"][5]) == len(r.data["headers"]) == 3
-
-
-def test_elision_applies_to_list_rows():
-    r = _table([[i, i] for i in range(20)], headers=["a", "b"])
-    assert r.data["rows"][5] == ["...", "..."]
+    r = _table([{"a": 1, "b": 2, "c": 3}] * 20, head=2, tail=2)
+    assert len(r.data["rows"][2]) == len(r.data["headers"]) == 3
+    assert r.data["rows"][2] == ["...", "...", "..."]
 
 
 def test_negative_head_raises():
     with pytest.raises(ValueError, match="negative"):
-        _table(_rows(3), head=-1)
+        _table(_dicts(3), head=-1)
 
 
 def test_negative_tail_raises():
     with pytest.raises(ValueError, match="negative"):
-        _table(_rows(3), tail=-1)
+        _table(_dicts(3), tail=-1)
