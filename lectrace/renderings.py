@@ -50,11 +50,25 @@ def _set_active(flag: bool) -> None:
     _local.active = flag
 
 
-def text(message: str, style: dict | None = None, verbatim: bool = False) -> None:
+def text(
+    message: str,
+    style: dict | None = None,
+    verbatim: bool = False,
+    language: str | None = None,
+) -> None:
     message = textwrap.dedent(message).strip()
-    extra: dict = {"fontFamily": "monospace", "whiteSpace": "pre"} if verbatim else {}
-    merged = {**extra, **(style or {})} or None
-    _store().append(Rendering(type="markdown", data=message, style=merged))
+    if verbatim or language:
+        # A real fenced block. Styling it as monospace markdown is not enough:
+        # the markdown parser eats the indentation and reads `__name__` as bold
+        # long before any CSS applies.
+        message = _fence(message, language)
+    _store().append(Rendering(type="markdown", data=message, style=style or None))
+
+
+def _fence(message: str, language: str | None) -> str:
+    longest = max((len(run) for run in re.findall(r"`+", message)), default=0)
+    ticks = "`" * max(3, longest + 1)
+    return f"{ticks}{language or ''}\n{message}\n{ticks}"
 
 
 def image(url: str, style: dict | None = None, width: int | str | None = None) -> None:
@@ -202,10 +216,10 @@ def note(message: str) -> None:
     _store().append(Rendering(type="note", data=textwrap.dedent(message).strip()))
 
 
-def system_text(command: list[str]) -> None:
-    raw = subprocess.check_output(command, text=True)
+def system_text(command: list[str], timeout: int = 60, language: str | None = None) -> None:
+    raw = subprocess.check_output(command, text=True, timeout=timeout)
     clean = re.sub(r"\x1b\[[0-9;]*m", "", raw)
-    text(clean, verbatim=True)
+    text(clean, verbatim=True, language=language)
 
 
 def url_reference(url: str, **kwargs) -> Reference:
