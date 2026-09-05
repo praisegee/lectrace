@@ -216,11 +216,21 @@ def table(
     except ImportError:
         pass
 
-    explicit = head is not AUTO or tail is not AUTO
-    head = DEFAULT_ROWS if head is AUTO else head
-    tail = DEFAULT_ROWS if tail is AUTO else tail
-    if not bulk and not explicit:
-        head = tail = None
+    # One end only means "just show me these": df.head(n) / df.tail(n), with no
+    # ellipsis. The ellipsis is for the two-ended views -- both ends given, or
+    # neither given and the input is bulk enough to elide by default.
+    given_head = head is not AUTO
+    given_tail = tail is not AUTO
+    gap = given_head == given_tail
+
+    if given_head and given_tail:
+        pass
+    elif given_head:
+        tail = 0
+    elif given_tail:
+        head = 0
+    else:
+        head = tail = DEFAULT_ROWS if bulk else None
 
     rows = list(rows)
 
@@ -247,6 +257,7 @@ def table(
             head,
             tail,
             len(headers) if headers else 0,
+            gap,
         ),
     }
     if caption is not None:
@@ -255,12 +266,18 @@ def table(
     _store().append(Rendering(type="table", data=data, style=style or None))
 
 
-def _elide(rows: list[list], head: int | None, tail: int | None, width: int) -> list[list]:
-    """Keep the first `head` and last `tail` rows, joined by a row of ellipses.
+def _elide(
+    rows: list[list],
+    head: int | None,
+    tail: int | None,
+    width: int,
+    gap: bool = True,
+) -> list[list]:
+    """Keep the first `head` and last `tail` rows, optionally joined by ellipses.
 
     `None` means "no limit" on that side. Rows are returned untouched when
     nothing would be hidden, so a 10-row table under the 5/5 default still
-    shows all ten.
+    shows all ten. `gap=False` drops the ellipsis row, for one-ended views.
     """
     if (head is not None and head < 0) or (tail is not None and tail < 0):
         raise ValueError("table() head= and tail= must not be negative")
@@ -273,8 +290,8 @@ def _elide(rows: list[list], head: int | None, tail: int | None, width: int) -> 
     if n <= h + t:
         return rows
 
-    gap = [ELLIPSIS] * (width or (len(rows[0]) if rows else 0))
-    return rows[:h] + [gap] + (rows[n - t :] if t else [])
+    middle = [[ELLIPSIS] * (width or (len(rows[0]) if rows else 0))] if gap else []
+    return rows[:h] + middle + (rows[n - t :] if t else [])
 
 
 def note(message: str) -> None:

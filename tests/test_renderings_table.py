@@ -262,18 +262,46 @@ def test_explicit_head_and_tail_apply_to_a_plain_list():
     assert rows[3:] == [[17, 289], [18, 324], [19, 361]]
 
 
-def test_explicit_head_alone_uses_default_tail():
+def test_head_alone_shows_only_the_first_rows():
     r = _table(_dicts(20), head=3)
+    assert r.data["rows"] == [[0, 0], [1, 1], [2, 4]]
+
+
+def test_tail_alone_shows_only_the_last_rows():
+    r = _table(_dicts(20), tail=3)
+    assert r.data["rows"] == [[17, 289], [18, 324], [19, 361]]
+
+
+def test_head_alone_has_no_ellipsis():
+    r = _table(_dicts(20), head=3)
+    assert ["...", "..."] not in r.data["rows"]
+
+
+def test_tail_alone_has_no_ellipsis():
+    r = _table(_dicts(20), tail=3)
+    assert ["...", "..."] not in r.data["rows"]
+
+
+def test_head_alone_on_a_dataframe():
+    r = _table(_frame(1000), head=4)
+    assert r.data["rows"] == [[i, i * i] for i in range(4)]
+
+
+def test_tail_alone_on_a_dataframe():
+    r = _table(_frame(1000), tail=4)
+    assert r.data["rows"] == [[i, i * i] for i in range(996, 1000)]
+
+
+def test_both_ends_keep_the_ellipsis():
+    r = _table(_dicts(20), head=3, tail=2)
     rows = r.data["rows"]
-    assert len(rows) == 9
+    assert len(rows) == 6
     assert rows[3] == ["...", "..."]
 
 
-def test_explicit_tail_alone_uses_default_head():
-    r = _table(_dicts(20), tail=2)
-    rows = r.data["rows"]
-    assert len(rows) == 8
-    assert rows[5] == ["...", "..."]
+def test_head_alone_shorter_than_the_data_is_untouched():
+    r = _table(_dicts(3), head=10)
+    assert len(r.data["rows"]) == 3
 
 
 def test_tail_zero_puts_ellipsis_last():
