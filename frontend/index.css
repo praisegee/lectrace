@@ -1,11 +1,14 @@
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 :root {
-  --font-code: "JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
+  --font-code:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --color-bg: #ffffff;
   --color-surface: #f8f9fa;
@@ -302,7 +305,10 @@ body.resizing {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.1s, border-color 0.1s, color 0.1s;
+  transition:
+    background 0.1s,
+    border-color 0.1s,
+    color 0.1s;
   min-width: 38px;
   min-height: 38px;
 }
@@ -485,7 +491,9 @@ body.resizing {
   user-select: none;
 }
 
-.data-table th.align-right { text-align: right; }
+.data-table th.align-right {
+  text-align: right;
+}
 
 .data-table td {
   padding: 8px 16px;
@@ -496,7 +504,9 @@ body.resizing {
   background: white;
 }
 
-.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
 
 .data-table tbody tr:nth-child(even) td {
   background: #f6f8fa;
@@ -506,7 +516,9 @@ body.resizing {
   background: #dbeafe !important;
 }
 
-.data-table td.align-right { text-align: right; }
+.data-table td.align-right {
+  text-align: right;
+}
 
 .table-cell-num {
   color: #0550ae;
@@ -521,7 +533,9 @@ body.resizing {
   font-size: 16px;
 }
 
-.table-cell-null { color: var(--color-muted); }
+.table-cell-null {
+  color: var(--color-muted);
+}
 
 /* ─── Environment panel ─── */
 
@@ -641,8 +655,12 @@ body.resizing {
   display: inline-block;
 }
 
-.env-dot--new     { background: #2da44e; }
-.env-dot--changed { background: #d97706; }
+.env-dot--new {
+  background: #2da44e;
+}
+.env-dot--changed {
+  background: #d97706;
+}
 
 .env-panel {
   font-family: var(--font-code);
@@ -829,14 +847,33 @@ body.resizing {
 
 /* ─── Value type colours ─── */
 
-.value-num  { color: #0550ae; }
-.value-bool { color: #8250df; }
-.value-none { color: var(--color-muted); }
-.value-str  { color: #0a3069; }
-.value-sympy { color: #8250df; font-style: italic; }
-.value-empty { color: var(--color-muted); }
-.value-muted { color: var(--color-muted); font-size: 14px; }
-.value-unknown { color: var(--color-error); font-size: 14px; }
+.value-num {
+  color: #0550ae;
+}
+.value-bool {
+  color: #8250df;
+}
+.value-none {
+  color: var(--color-muted);
+}
+.value-str {
+  color: #0a3069;
+}
+.value-sympy {
+  color: #8250df;
+  font-style: italic;
+}
+.value-empty {
+  color: var(--color-muted);
+}
+.value-muted {
+  color: var(--color-muted);
+  font-size: 14px;
+}
+.value-unknown {
+  color: var(--color-error);
+  font-size: 14px;
+}
 
 /* ─── External link cards ─── */
 
@@ -882,7 +919,10 @@ body.resizing {
   line-height: 1.4;
 }
 
-.link-authors, .link-date, .link-description, .link-notes {
+.link-authors,
+.link-date,
+.link-description,
+.link-notes {
   color: var(--color-muted);
   font-size: 14px;
 }
@@ -948,7 +988,9 @@ body.resizing {
 }
 
 @keyframes loader-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── Markdown rendered content ─── */
@@ -977,9 +1019,15 @@ body.resizing {
   line-height: 1.3;
 }
 
-.markdown-content h1 { font-size: 1.5em; }
-.markdown-content h2 { font-size: 1.2em; }
-.markdown-content h3 { font-size: 1.05em; }
+.markdown-content h1 {
+  font-size: 1.5em;
+}
+.markdown-content h2 {
+  font-size: 1.2em;
+}
+.markdown-content h3 {
+  font-size: 1.05em;
+}
 
 .markdown-content code {
   font-family: var(--font-code);
@@ -989,7 +1037,9 @@ body.resizing {
   border-radius: 3px;
 }
 
-.markdown-content a { color: var(--color-accent); }
+.markdown-content a {
+  color: var(--color-accent);
+}
 
 .markdown-content ul,
 .markdown-content ol {
@@ -1001,7 +1051,9 @@ body.resizing {
   margin: 0.15em 0;
 }
 
-.markdown-content strong { font-weight: 600; }
+.markdown-content strong {
+  font-weight: 600;
+}
 
 .markdown-content .katex-display {
   margin: 0.5em 0;
@@ -1010,9 +1062,15 @@ body.resizing {
 
 /* ─── Fullscreen: hide sidebar, give code maximum space ─── */
 
-:fullscreen .trace-browser { display: none; }
-:-webkit-full-screen .trace-browser { display: none; }
-:fullscreen .mobile-bottom-nav { display: none; }
+:fullscreen .trace-browser {
+  display: none;
+}
+:-webkit-full-screen .trace-browser {
+  display: none;
+}
+:fullscreen .mobile-bottom-nav {
+  display: none;
+}
 
 /* ─── Mobile responsive (≤ 640px) ─── */
 
@@ -1057,27 +1115,45 @@ body.resizing {
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   /* Show lecture title, hide file path */
-  .nav-title { display: block; }
-  .nav-path  { display: none; }
+  .nav-title {
+    display: block;
+  }
+  .nav-path {
+    display: none;
+  }
 
   /* Hide desktop-only sep and step group */
-  .nav-desktop-sep { display: none; }
-  .nav-step-group  { display: none; }
+  .nav-desktop-sep {
+    display: none;
+  }
+  .nav-step-group {
+    display: none;
+  }
 
   /* Smaller toggles in top nav */
   .nav-btn-animate,
-  .nav-btn-raw { display: none; }
+  .nav-btn-raw {
+    display: none;
+  }
 
   /* Stack env panel below code */
-  .viewer-body { flex-direction: column; }
+  .viewer-body {
+    flex-direction: column;
+  }
 
   /* Hide desktop resize handle */
-  .viewer-resize-handle { display: none; }
+  .viewer-resize-handle {
+    display: none;
+  }
 
   /* Env wrapper: full width below code */
   .env-wrapper {
@@ -1156,7 +1232,9 @@ body.resizing {
     justify-content: center;
     font-size: 22px;
     min-height: 53px;
-    transition: color 0.12s, background 0.12s;
+    transition:
+      color 0.12s,
+      background 0.12s;
     position: relative;
   }
 
@@ -1217,8 +1295,12 @@ body.resizing {
     font-size: 18px;
   }
 
-  .markdown-content h1 { font-size: 1.35em; }
-  .markdown-content h2 { font-size: 1.15em; }
+  .markdown-content h1 {
+    font-size: 1.35em;
+  }
+  .markdown-content h2 {
+    font-size: 1.15em;
+  }
 
   /* Matrix: slightly smaller cells on mobile */
   .matrix td {
