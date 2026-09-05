@@ -22,7 +22,7 @@ def serialize(value: Any, depth: int = 0) -> dict:
     if hasattr(value, "__lectrace__"):
         try:
             return serialize(value.__lectrace__(), depth + 1)
-        except Exception:
+        except Exception:  # noqa: BLE001, S110
             pass
 
     t = _type_str(value)

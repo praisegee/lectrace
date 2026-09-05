@@ -157,12 +157,12 @@ def plot(spec: object) -> None:
 
 
 def table(
-    rows: "list[dict] | list[list]",
-    headers: "list[str] | None" = None,
-    caption: "str | None" = None,
-    style: "dict | None" = None,
-    head: "int | None" = 5,
-    tail: "int | None" = 5,
+    rows: list[dict] | list[list],
+    headers: list[str] | None = None,
+    caption: str | None = None,
+    style: dict | None = None,
+    head: int | None = 5,
+    tail: int | None = 5,
 ) -> None:
     try:
         import pandas as pd  # type: ignore[import-untyped]

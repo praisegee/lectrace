@@ -19,15 +19,14 @@ def download(url: str, dest: Path, timeout: int = 30) -> None:
     )
     for attempt in range(5):
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                with open(dest, "wb") as f:
-                    shutil.copyfileobj(resp, f)
+            with urllib.request.urlopen(req, timeout=timeout) as resp, open(dest, "wb") as f:
+                shutil.copyfileobj(resp, f)
             return
         except urllib.error.HTTPError as exc:
             if exc.code != 429:
                 raise
             wait = min(2**attempt, 60)
-            print(f"Rate limited — retrying in {wait}s...")
+            print(f"Rate limited - retrying in {wait}s...")
             time.sleep(wait)
     raise RuntimeError(f"Failed to download {url} after 5 attempts")
 
