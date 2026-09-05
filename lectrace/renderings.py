@@ -191,7 +191,14 @@ def table(
         if isinstance(rows, pd.DataFrame):
             if headers is None:
                 headers = [str(c) for c in rows.columns]
-            rows = [list(r) for r in rows.itertuples(index=False, name=None)]
+                rows = [list(r) for r in rows.itertuples(index=False, name=None)]
+            else:
+                # Let the dict path below select and order the columns, so that
+                # headers= reorders a DataFrame the same way it reorders dicts.
+                rows = [
+                    {str(k): v for k, v in record.items()}
+                    for record in rows.to_dict("records")
+                ]
             bulk = True
     except ImportError:
         pass
