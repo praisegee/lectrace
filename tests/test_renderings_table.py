@@ -74,6 +74,16 @@ def test_no_caption_key_when_absent():
     assert "caption" not in r.data
 
 
+def test_hand_written_rows_are_markdown():
+    r = _table([["`x`", "$y$"]], headers=["a", "b"])
+    assert r.data["markdown"] is True
+
+
+def test_array_rows_are_not_markdown():
+    np = pytest.importorskip("numpy")
+    r = _table(np.array([[1, 2]]), headers=["a", "b"])
+    assert "markdown" not in r.data
+
 def test_style_forwarded():
     r = _table([{"x": 1}], style={"maxWidth": "600px"})
     assert r.style == {"maxWidth": "600px"}

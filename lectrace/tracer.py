@@ -392,7 +392,7 @@ def _under_stepover(stack: list[StackFrame], stepovers: list[tuple[str, int]]) -
 
 
 _RENDER_FNS = frozenset(
-    {"text", "note", "plot", "image", "video", "link", "system_text"}
+    {"text", "note", "plot", "image", "video", "link", "system_text", "table"}
 )
 
 

@@ -27,3 +27,18 @@ export function MarkdownView({ content, style }: Props) {
     </div>
   );
 }
+
+const inlineComponents = { p: ({ children }: { children?: React.ReactNode }) => <>{children}</> };
+
+/** Markdown for a short run of text, without the wrapping paragraph. */
+export function InlineMarkdown({ content }: { content: string }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkMath, remarkGfm]}
+      rehypePlugins={rehypePlugins}
+      components={inlineComponents}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+}

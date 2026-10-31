@@ -53,6 +53,17 @@ def test_incremental_rebuilds_a_missing_trace(site):
     assert _ids(out) == ["01_one", "02_two"]
 
 
+def test_incremental_rebuilds_after_a_version_change(site, monkeypatch, capsys):
+    out = site / "_site"
+    build(output=out)
+    monkeypatch.setattr("lectrace.__version__", "0.0.0-next")
+    capsys.readouterr()
+
+    # Source is unchanged, but a trace from another version may lack new fields.
+    build(output=out, incremental=True)
+
+    assert "up to date" not in capsys.readouterr().out
+
 def test_full_build_still_prunes_deleted_lectures(site):
     out = site / "_site"
     build(output=out)

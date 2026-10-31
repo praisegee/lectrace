@@ -174,14 +174,17 @@ function renderRendering(r: Rendering, onGotoLocation: (path: string, ln: number
 }
 
 function stripDirectives(htmlLine: string): string {
-  const i = htmlLine.indexOf("#");
+  // Find the comment by highlight.js's markup rather than the first "#", which
+  // may sit inside a string literal.
+  const i = htmlLine.indexOf('<span class="hljs-comment">');
   if (i === -1) return htmlLine;
   const code = htmlLine.slice(0, i);
   // A state's name is drawn as a label beside the line, so drop it from the
   // comment along with the directive; other directives keep their arguments.
   const comment = htmlLine.slice(i)
+    .replace(/<[^>]*>/g, "")
     .replace(/@state(?:\s+(?!@)\S+)*/g, "")
     .replace(/@\S+/g, "")
     .replace(/#\s*$/, "");
-  return comment.trim() === "" ? code : code + comment;
+  return comment.trim() === "" ? code : `${code}<span class="hljs-comment">${comment}</span>`;
 }

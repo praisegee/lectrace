@@ -64,6 +64,7 @@ def build(
     files: list[Path] | None = None,
     incremental: bool = True,
 ) -> None:
+    from lectrace import __version__
     from lectrace.tracer import execute
 
     output.mkdir(parents=True, exist_ok=True)
@@ -85,9 +86,12 @@ def build(
         cached_entry = cache.get(cache_key, {})
 
         trace_path = traces_dir / f"{lecture.stem}.json"
+        # A trace built by another lectrace version may lack newer fields
+        # (e.g. named states), so a version change forces a rebuild.
         if (
             incremental
             and cached_entry.get("hash") == src_hash
+            and cached_entry.get("version") == __version__
             and trace_path.exists()
         ):
             index_entries.append(cached_entry["index_entry"])
@@ -110,7 +114,11 @@ def build(
             "built_at": trace.metadata.built_at,
         }
         index_entries.append(entry)
-        cache[cache_key] = {"hash": src_hash, "index_entry": entry}
+        cache[cache_key] = {
+            "hash": src_hash,
+            "version": __version__,
+            "index_entry": entry,
+        }
         print(f"     {len(trace.steps)} steps in {elapsed:.1f}s")
 
     if files is not None:
