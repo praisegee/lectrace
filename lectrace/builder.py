@@ -179,7 +179,9 @@ def _copy_static(dest: Path) -> None:
         if item.is_file():
             target = dest / item.relative_to(static)
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(item, target)
+            # Not copy2: the package's file times would become each file's
+            # Last-Modified, which browsers use to decide how long to cache.
+            shutil.copy(item, target)
 
 
 def _first_title(trace) -> str:

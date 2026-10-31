@@ -17,6 +17,7 @@ interface Props {
   lineNumber: number;
   stepIndex: number;
   rawMode: boolean;
+  wrapMode: boolean;
   animateMode: boolean;
   entryDefLine: number | null;
   onGotoLine: (ln: number) => void;
@@ -25,7 +26,7 @@ interface Props {
 
 export function LinesPanel({
   trace, path, lineNumber, stepIndex,
-  rawMode, animateMode, entryDefLine,
+  rawMode, wrapMode, animateMode, entryDefLine,
   onGotoLine, onGotoLocation,
 }: Props) {
   const fileContents = trace.files[path] ?? "";
@@ -82,7 +83,7 @@ export function LinesPanel({
   let prevVisibleLn = 0;
 
   return (
-    <div className="lines-panel">
+    <div className={`lines-panel${wrapMode ? "" : " no-wrap"}`}>
       {highlightedLines.map((htmlLine, idx) => {
         const ln = idx + 1;
         if (!rawMode && hidden.has(ln)) return null;

@@ -26,6 +26,9 @@ Click any line number to jump directly to the first step on that line.
 | `E` | **Variable panel** — shows/hides the variable panel. |
 | `R` | **Raw mode** — shows the original source code instead of rendered markdown and images. Useful for copying code. |
 | `F` | **Fullscreen** — enters/exits fullscreen presentation mode. |
+| `W` | **Line wrapping** — wraps long code lines to the panel width (on by default). Turn it off to keep each line on one row and scroll sideways. Rendered text always wraps. |
+
+Drag the right edge of the lecture sidebar to resize it; drag it to the left edge to hide it. The sidebar button in the top bar brings it back.
 
 ---
 
