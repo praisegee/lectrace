@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { Trace, StackFrame } from "../types/trace";
+import type { NamedState, Trace, StackFrame } from "../types/trace";
 
 export function useNavigation(
   trace: Trace | null,
@@ -33,7 +33,30 @@ export function useNavigation(
     go(getStepUp(trace, stepIndex));
   }, [trace, stepIndex, go]);
 
-  return { stepForward, stepBackward, stepOverForward, stepOverBackward, stepUp };
+  const nextState = useCallback(() => {
+    const states = trace?.states ?? [];
+    const next = states.find((s) => s.step_index > stepIndex);
+    if (next) go(next.step_index);
+  }, [trace, stepIndex, go]);
+
+  // Like a media player's "previous": back to the start of the current state,
+  // or to the state before it when already at its start.
+  const prevState = useCallback(() => {
+    const states = trace?.states ?? [];
+    const prev = [...states].reverse().find((s) => s.step_index < stepIndex);
+    if (prev) go(prev.step_index);
+  }, [trace, stepIndex, go]);
+
+  return {
+    stepForward, stepBackward, stepOverForward, stepOverBackward, stepUp, nextState, prevState,
+  };
+}
+
+/** Index into `states` of the state that `stepIndex` falls in, or -1 before the first. */
+export function currentStateIndex(states: NamedState[], stepIndex: number): number {
+  let current = -1;
+  states.forEach((s, i) => { if (s.step_index <= stepIndex) current = i; });
+  return current;
 }
 
 function getStepOver(trace: Trace, from: number, dir: 1 | -1): number {

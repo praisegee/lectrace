@@ -4,12 +4,16 @@ import {
   StepBackIcon, StepFwdIcon, SkipBackIcon, SkipFwdIcon, StepOutIcon,
   SidebarIcon,
 } from "../icons";
+import type { NamedState } from "../../types/trace";
 
 interface Props {
   path: string;
   title: string;
   stepIndex: number;
   totalSteps: number;
+  states: NamedState[];
+  currentState: number;
+  onGotoStep: (i: number) => void;
   rawMode: boolean;
   animateMode: boolean;
   hideEnv: boolean;
@@ -27,7 +31,7 @@ interface Props {
 }
 
 export function NavigationBar({
-  path, title, stepIndex, totalSteps,
+  path, title, stepIndex, totalSteps, states, currentState, onGotoStep,
   rawMode, animateMode, hideEnv, isFullscreen,
   onToggleSidebar,
   onStepForward, onStepBackward, onStepOverForward, onStepOverBackward, onStepUp,
@@ -43,11 +47,15 @@ export function NavigationBar({
           <SidebarIcon size={19} />
         </button>
 
-        {/* Mobile: lecture title */}
-        <span className="nav-title">{title}</span>
+        {/* Mobile: lecture title, or the state picker in its place when there are states */}
+        {states.length === 0 && <span className="nav-title">{title}</span>}
 
         {/* Desktop: file path */}
         <span className="nav-path">{path}</span>
+
+        {states.length > 0 && (
+          <StateSelect states={states} current={currentState} onGotoStep={onGotoStep} />
+        )}
 
         <span className="nav-counter">{stepIndex + 1} / {totalSteps}</span>
 
@@ -83,7 +91,46 @@ export function NavigationBar({
       </div>
       <div className="progress-bar" title={`Step ${stepIndex + 1} of ${totalSteps}`}>
         <div className="progress-fill" style={{ width: `${pct}%` }} />
+        {totalSteps > 1 && states.map((st) => (
+          <div
+            key={st.name}
+            className="progress-tick"
+            style={{ left: `${(st.step_index / (totalSteps - 1)) * 100}%` }}
+          />
+        ))}
       </div>
     </div>
+  );
+}
+
+function StateSelect({ states, current, onGotoStep }: {
+  states: NamedState[];
+  current: number;
+  onGotoStep: (i: number) => void;
+}) {
+  const total = states.reduce((sum, st) => sum + st.elapsed_s, 0);
+  const share = (st: NamedState) => {
+    if (total <= 0) return "";
+    const pct = (st.elapsed_s / total) * 100;
+    return pct < 1 ? " · <1%" : ` · ${Math.round(pct)}%`;
+  };
+
+  return (
+    <select
+      className="nav-state"
+      value={current}
+      onChange={(e) => {
+        const st = states[Number(e.target.value)];
+        if (st) onGotoStep(st.step_index);
+      }}
+      title="Named states [ [ and ] ]. Percentages are each state's share of run time; tracing slows code down, so compare states rather than reading them as real timings."
+    >
+      {current === -1 && <option value={-1}>Start</option>}
+      {states.map((st, i) => (
+        <option key={st.name} value={i}>
+          {i + 1}. {st.name}{share(st)}
+        </option>
+      ))}
+    </select>
   );
 }

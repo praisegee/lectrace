@@ -279,6 +279,43 @@ body.resizing {
   min-width: 0;
 }
 
+.nav-state {
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  padding: 5px 6px;
+  max-width: 280px;
+  min-width: 0;
+  flex-shrink: 1;
+  cursor: pointer;
+}
+
+.state-label {
+  margin-left: 12px;
+  padding: 0 7px;
+  border-radius: 9px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: nowrap;
+  color: var(--color-accent);
+  background: #dbeafe;
+  align-self: center;
+}
+
+.progress-tick {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  margin-left: -1px;
+  background: var(--color-text);
+  opacity: 0.55;
+}
+
 .nav-counter {
   font-size: 16px;
   color: var(--color-muted);
@@ -343,6 +380,7 @@ body.resizing {
   margin-top: 6px;
   border-radius: 2px;
   overflow: hidden;
+  position: relative;
 }
 
 .progress-fill {
@@ -713,12 +751,59 @@ body.resizing {
   display: inline-flex;
   flex-direction: column;
   gap: 3px;
+  /* As wide as the label, table or heatmap; stats and captions wrap under them. */
+  width: min-content;
 }
 
 .tensor-label {
+  white-space: nowrap;
   font-size: 13px;
   color: var(--color-muted);
   font-family: var(--font-code);
+}
+
+.tensor-toggle {
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+.tensor-summary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 13px;
+  font-family: var(--font-code);
+  font-variant-numeric: tabular-nums;
+}
+
+.tensor-summary > span {
+  white-space: nowrap;
+}
+
+.tensor-badge {
+  color: #fff;
+  background: var(--color-error);
+  border-radius: 3px;
+  padding: 0 5px;
+}
+
+.tensor-heatmap {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tensor-heatmap canvas {
+  image-rendering: pixelated;
+  border: 1px solid var(--color-border);
+  align-self: flex-start;
+}
+
+.tensor-hover {
+  font-size: 12px;
+  color: var(--color-muted);
+  font-family: var(--font-code);
+  min-height: 1.4em;
 }
 
 .matrix {
@@ -1126,6 +1211,11 @@ body.resizing {
   /* Show lecture title, hide file path */
   .nav-title {
     display: block;
+  }
+  /* Takes the lecture title's place. */
+  .nav-state {
+    flex: 1;
+    max-width: none;
   }
   .nav-path {
     display: none;

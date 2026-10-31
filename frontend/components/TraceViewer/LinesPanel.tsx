@@ -52,6 +52,14 @@ export function LinesPanel({
 
   const hidden = new Set(trace.hidden_line_numbers[path] ?? []);
 
+  const stateNames = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const st of trace.states ?? []) {
+      if (st.path === path) map.set(st.line_number, st.name);
+    }
+    return map;
+  }, [trace.states, path]);
+
   const sourceLines = useMemo(() => fileContents.split("\n"), [fileContents]);
 
   const scrollRef = useCallback((el: HTMLElement | null) => {
@@ -120,6 +128,9 @@ export function LinesPanel({
                   dangerouslySetInnerHTML={{ __html: rawMode ? htmlLine : stripDirectives(htmlLine) }}
                 />
               )}
+              {!rawMode && !hasRenderings && stateNames.has(ln) && (
+                <span className="state-label">{stateNames.get(ln)}</span>
+              )}
             </div>
           </div>
         );
@@ -166,6 +177,11 @@ function stripDirectives(htmlLine: string): string {
   const i = htmlLine.indexOf("#");
   if (i === -1) return htmlLine;
   const code = htmlLine.slice(0, i);
-  const comment = htmlLine.slice(i).replace(/@\S+/g, "").replace(/#\s*$/, "");
+  // A state's name is drawn as a label beside the line, so drop it from the
+  // comment along with the directive; other directives keep their arguments.
+  const comment = htmlLine.slice(i)
+    .replace(/@state(?:\s+(?!@)\S+)*/g, "")
+    .replace(/@\S+/g, "")
+    .replace(/#\s*$/, "");
   return comment.trim() === "" ? code : code + comment;
 }

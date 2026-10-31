@@ -4,6 +4,18 @@ export interface Trace {
   files: Record<string, string>;
   hidden_line_numbers: Record<string, number[]>;
   steps: Step[];
+  /** Absent in traces built before named states existed. */
+  states?: NamedState[];
+}
+
+/** A point the author named with `# @state`; the viewer uses these as chapters. */
+export interface NamedState {
+  name: string;
+  step_index: number;
+  path: string;
+  line_number: number;
+  /** Time until the next state; tracing slows code, so only compare these with each other. */
+  elapsed_s: number;
 }
 
 export interface TraceMetadata {
@@ -41,9 +53,19 @@ export type Value =
   | { type: "int" | "float"; contents: number | string }
   | { type: "str"; contents: string }
   | { type: "complex"; contents: { real: number; imag: number } }
-  | { type: string; contents: Value[]; shape?: number[]; dtype?: string }
+  | { type: string; contents: Value[]; shape?: number[]; dtype?: string; summary?: TensorSummary; truncated?: boolean }
   | { type: string; contents: Record<string, Value> }
   | { type: string; contents: string | number | boolean | null };
+
+/** Stats over all of a tensor's elements; mean/std/min/max cover finite values only. */
+export interface TensorSummary {
+  nan: number;
+  inf: number;
+  mean?: number;
+  std?: number;
+  min?: number;
+  max?: number;
+}
 
 export interface TableData {
   headers: string[];

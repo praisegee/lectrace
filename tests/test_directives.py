@@ -11,6 +11,7 @@ from lectrace.directives import (
     has,
     inspect_vars,
     parse,
+    state_name,
 )
 from lectrace.tracer import execute
 
@@ -110,3 +111,17 @@ def test_directive_on_indented_line():
 def test_unparsable_fragment_falls_back_to_split():
     directives = parse('d = {"a": 1,  # @inspect d')
     assert inspect_vars(directives) == ["d"]
+
+
+def test_state_name_joins_words():
+    assert state_name(parse("x = 1  # @state Attention scores")) == "Attention scores"
+
+
+def test_state_name_with_other_directives():
+    ds = parse("q = x @ w  # @inspect q @state Queries")
+    assert inspect_vars(ds) == ["q"]
+    assert state_name(ds) == "Queries"
+
+
+def test_bare_state_has_no_name():
+    assert state_name(parse("x = 1  # @state")) is None

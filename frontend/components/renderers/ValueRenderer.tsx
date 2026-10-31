@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Value } from "../../types/trace";
+import type { TensorSummary, Value } from "../../types/trace";
 import { TensorView } from "./TensorView";
 import { formatNumber } from "../../utils/format";
 
@@ -75,6 +75,8 @@ function renderValue(value: Value, depth: number): React.ReactNode {
             shape={value.shape as number[]}
             dtype={dtype}
             contents={value.contents}
+            summary={(value as { summary?: TensorSummary }).summary}
+            truncated={(value as { truncated?: boolean }).truncated}
           />
         );
       }

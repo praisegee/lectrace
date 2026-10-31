@@ -9,8 +9,9 @@ CLEAR = "@clear"
 STEPOVER = "@stepover"
 HIDE = "@hide"
 INVISIBLE = "@invisible"
+STATE = "@state"
 
-_KNOWN = {INSPECT, CLEAR, STEPOVER, HIDE, INVISIBLE}
+_KNOWN = {INSPECT, CLEAR, STEPOVER, HIDE, INVISIBLE, STATE}
 
 
 @dataclass(frozen=True)
@@ -60,6 +61,14 @@ def inspect_vars(directives: list[Directive]) -> list[str]:
 
 def clear_vars(directives: list[Directive]) -> list[str]:
     return [arg for d in directives if d.name == CLEAR for arg in d.args]
+
+
+def state_name(directives: list[Directive]) -> str | None:
+    """The name given by `# @state Some name`, or None. A bare @state has no name."""
+    for d in directives:
+        if d.name == STATE and d.args:
+            return " ".join(d.args)
+    return None
 
 
 def has(directives: list[Directive], name: str) -> bool:
