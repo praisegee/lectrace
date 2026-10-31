@@ -14,6 +14,9 @@ interface Props {
   onToggleSidebar: () => void;
 }
 
+// Narrowest the code panel gets when the variables panel is dragged wider.
+const MIN_CODE_WIDTH = 280;
+
 export function TraceViewer({ onToggleSidebar }: Props) {
   const [params, setParams] = useSearchParams();
   const tracePath = params.get("trace");
@@ -72,6 +75,7 @@ export function TraceViewer({ onToggleSidebar }: Props) {
   // Resizable env panel (desktop)
   const [envWidth, setEnvWidth] = useState(380);
   const resizeRef = useRef({ active: false, startX: 0, startW: 380 });
+  const bodyRef = useRef<HTMLDivElement>(null);
   const [mobileEnvOpen, setMobileEnvOpen] = useState(false);
 
   const onResizeStart = (e: React.MouseEvent) => {
@@ -84,7 +88,9 @@ export function TraceViewer({ onToggleSidebar }: Props) {
     const onMove = (e: MouseEvent) => {
       if (!resizeRef.current.active) return;
       const delta = e.clientX - resizeRef.current.startX;
-      setEnvWidth(Math.max(160, Math.min(520, resizeRef.current.startW - delta)));
+      // Let the panel grow as far as the window allows, keeping room for the code.
+      const max = (bodyRef.current?.clientWidth ?? 0) - MIN_CODE_WIDTH;
+      setEnvWidth(Math.max(160, Math.min(max, resizeRef.current.startW - delta)));
     };
     const onUp = () => {
       resizeRef.current.active = false;
@@ -203,7 +209,7 @@ export function TraceViewer({ onToggleSidebar }: Props) {
         onToggleEnv={() => toggle("hideEnv", "1")}
         onToggleFullscreen={toggleFullscreen}
       />
-      <div className="viewer-body">
+      <div className="viewer-body" ref={bodyRef}>
         <div
           className="viewer-code"
           onTouchStart={swipe.onTouchStart}
