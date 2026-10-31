@@ -165,6 +165,23 @@ def test_invisible_line_is_hidden():
     assert invisible_lineno in hidden
 
 
+def test_multiline_table_call_hides_continuation_lines():
+    path = _write("""
+        from lectrace import table
+
+        def main():
+            table(
+                [[1, 2]],
+                headers=["a", "b"],
+            )
+    """)
+    trace = execute(path)
+    hidden = next(iter(trace.hidden_line_numbers.values()))
+    src_lines = next(iter(trace.files.values())).split("\n")
+    start = next(i for i, l in enumerate(src_lines, start=1) if "table(" in l)
+    assert start not in hidden
+    assert all(ln in hidden for ln in range(start + 1, start + 4))
+
 def test_invisible_variable_visible_in_next_step():
     path = _write("""
         def main():

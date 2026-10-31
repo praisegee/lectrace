@@ -262,6 +262,10 @@ def table(
     }
     if caption is not None:
         data["caption"] = caption
+    # Hand-written cells may use markdown like `code` or $x$; cells from a
+    # DataFrame or array are data, where "$5" or "a_b" must stay as written.
+    if not bulk:
+        data["markdown"] = True
 
     _store().append(Rendering(type="table", data=data, style=style or None))
 

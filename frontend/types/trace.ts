@@ -71,6 +71,8 @@ export interface TableData {
   headers: string[];
   rows: (string | number | boolean | null)[][];
   caption?: string;
+  /** Render string cells and headers as inline markdown (hand-written tables only). */
+  markdown?: boolean;
 }
 
 export type Rendering =
