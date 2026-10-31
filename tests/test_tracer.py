@@ -1,3 +1,4 @@
+import os
 import textwrap
 import tempfile
 from pathlib import Path
@@ -272,3 +273,28 @@ def test_states_survive_error():
     trace = execute(path)
     assert trace.metadata.error is not None
     assert [s.name for s in trace.states] == ["Before"]
+
+
+def test_helper_edits_are_seen_by_the_next_trace(tmp_path):
+    helper = tmp_path / "_data.py"
+    helper.write_text("VALUE = 1\n")
+    lecture = tmp_path / "lecture.py"
+    lecture.write_text(textwrap.dedent("""
+        from _data import VALUE
+
+        def main():
+            x = VALUE  # @inspect x
+    """))
+
+    first = execute(lecture)
+    helper.write_text("VALUE = 2\n")
+    # Python's bytecode cache keys on whole-second mtime and size, both equal
+    # here; a real save happens later, so move the mtime on as one would.
+    mtime = helper.stat().st_mtime + 2
+    os.utime(helper, (mtime, mtime))
+    second = execute(lecture)
+
+    assert first.steps[-1].env["x"]["contents"] == 1
+    # Without dropping the helper module, the second trace would reuse VALUE = 1.
+    assert second.steps[-1].env["x"]["contents"] == 2
+    assert [Path(d).name for d in second.dependencies] == ["_data.py"]

@@ -85,6 +85,9 @@ class Trace:
     hidden_line_numbers: dict[str, list[int]]
     steps: list[Step]
     states: list[NamedState] = field(default_factory=list)
+    # Local modules the lecture imported (helper files), so a build can tell
+    # when an edit to one of them makes this trace stale.
+    dependencies: list[str] = field(default_factory=list)
 
 
 def _statement_lines(source_text: str) -> set[int]:
@@ -157,6 +160,7 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
     spec = importlib.util.spec_from_file_location("_lecture", source)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
+    modules_before = set(sys.modules)
     sys.modules["_lecture"] = module
     visible.add(str(source.resolve()))
 
@@ -343,6 +347,11 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
     end_time = time.perf_counter()
 
     sys.modules.pop("_lecture", None)
+    # Drop helper modules too, so the next trace re-imports them and sees any
+    # edits instead of reusing the module loaded by this run.
+    helpers = _local_modules(set(sys.modules) - modules_before, Path(source_dir))
+    for name in helpers:
+        sys.modules.pop(name, None)
     if _added_to_path and source_dir in sys.path:
         sys.path.remove(source_dir)
 
@@ -379,7 +388,25 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         hidden_line_numbers=hidden,
         steps=steps,
         states=states,
+        dependencies=sorted(relativize(path) for path in helpers.values()),
     )
+
+
+def _local_modules(names: set[str], source_dir: Path) -> dict[str, Path]:
+    """Map each of `names` that was loaded from a file under `source_dir` to its path.
+
+    Installed packages are left out, even in a virtualenv inside the lecture
+    folder, and so is lectrace itself when run from its own checkout.
+    """
+    found = {}
+    for name in names:
+        file = getattr(sys.modules.get(name), "__file__", None)
+        if not file or name.split(".")[0] == "lectrace":
+            continue
+        path = Path(file).resolve()
+        if path.is_relative_to(source_dir) and "site-packages" not in path.parts:
+            found[name] = path
+    return found
 
 
 def _under_stepover(stack: list[StackFrame], stepovers: list[tuple[str, int]]) -> bool:

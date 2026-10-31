@@ -92,6 +92,7 @@ def build(
             incremental
             and cached_entry.get("hash") == src_hash
             and cached_entry.get("version") == __version__
+            and _deps_unchanged(cached_entry.get("deps", {}))
             and trace_path.exists()
         ):
             index_entries.append(cached_entry["index_entry"])
@@ -117,6 +118,7 @@ def build(
         cache[cache_key] = {
             "hash": src_hash,
             "version": __version__,
+            "deps": {d: _sha256(Path(d)) for d in trace.dependencies},
             "index_entry": entry,
         }
         print(f"     {len(trace.steps)} steps in {elapsed:.1f}s")
@@ -164,6 +166,11 @@ def _surviving_entries(traces_dir: Path, built: list[dict]) -> list[dict]:
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _deps_unchanged(deps: dict[str, str]) -> bool:
+    """True if every helper file a trace imported still has the hash it had."""
+    return all(Path(d).exists() and _sha256(Path(d)) == h for d, h in deps.items())
 
 
 def _copy_static(dest: Path) -> None:
