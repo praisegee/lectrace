@@ -221,6 +221,8 @@ body.resizing {
 
 .env-wrapper {
   flex-shrink: 0;
+  /* Matches MIN_CODE_WIDTH in TraceViewer, for when the window shrinks. */
+  max-width: calc(100% - 280px);
   overflow-y: auto;
   border-left: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -1280,6 +1282,7 @@ body.resizing {
   /* Env wrapper: full width below code */
   .env-wrapper {
     width: 100% !important;
+    max-width: none;
     border-left: none;
     border-top: 1px solid var(--color-border);
     padding: 0;
