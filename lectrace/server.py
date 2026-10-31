@@ -61,6 +61,12 @@ def _make_handler(root: Path):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(root), **kwargs)
 
+        def end_headers(self):
+            # Make the browser revalidate every file, so a rebuild or a lectrace
+            # upgrade is picked up on reload instead of served from cache.
+            self.send_header("Cache-Control", "no-cache")
+            super().end_headers()
+
         def log_message(self, fmt, *args):
             pass
 
