@@ -36,21 +36,45 @@ def serve(files: list[Path] | None = None, port: int = 7000) -> None:
 def _watch_and_rebuild(files: list[Path], output: Path) -> None:
     from lectrace.builder import build
 
-    mtimes: dict[str, float] = {str(f): f.stat().st_mtime for f in files}
+    def helpers() -> list[Path]:
+        # Every other .py file beside a lecture may be imported by one. Rescanned
+        # each tick so a helper created while serving is picked up.
+        lectures = set(files)
+        dirs = {f.parent for f in files}
+        return [p for d in dirs for p in d.glob("*.py") if p not in lectures]
+
+    mtimes: dict[str, float] = {str(f): f.stat().st_mtime for f in files + helpers()}
+
+    def changed(paths: list[Path]) -> list[Path]:
+        out = []
+        for p in paths:
+            try:
+                mtime = p.stat().st_mtime
+            except FileNotFoundError:
+                continue
+            if mtime != mtimes.get(str(p)):
+                mtimes[str(p)] = mtime
+                out.append(p)
+        return out
 
     def watch() -> None:
         while True:
             time.sleep(1)
-            changed = [f for f in files if f.stat().st_mtime != mtimes.get(str(f))]
-            if changed:
-                for f in changed:
-                    mtimes[str(f)] = f.stat().st_mtime
+            ts = time.strftime("%H:%M:%S")
+            lectures = changed(files)
+            if lectures:
                 label = (
-                    changed[0].name if len(changed) == 1 else f"{len(changed)} files"
+                    lectures[0].name if len(lectures) == 1 else f"{len(lectures)} files"
                 )
-                ts = time.strftime("%H:%M:%S")
                 print(f"\n  [{ts}] {label} saved :: rebuilding...")
-                build(output=output, files=changed, incremental=False)
+                build(output=output, files=lectures, incremental=False)
+            edited = changed(helpers())
+            if edited:
+                label = edited[0].name if len(edited) == 1 else f"{len(edited)} helpers"
+                print(f"\n  [{ts}] {label} saved :: rebuilding lectures that use it...")
+                # The cache records which helpers each trace imported, so an
+                # incremental build redoes only the lectures that use them.
+                build(output=output, files=files, incremental=True)
 
     t = threading.Thread(target=watch, daemon=True)
     t.start()

@@ -26,6 +26,8 @@ uv add lectrace
 pip install lectrace
 ```
 
+If the `lectrace` command isn't found after installing (common with the Microsoft Store Python on Windows), use `python -m lectrace` instead: `python -m lectrace serve` works the same way.
+
 Requires Python 3.11+. Zero mandatory dependencies. lectrace uses the standard library only. numpy, torch, and sympy are detected and rendered automatically if already installed in your environment.
 
 ---

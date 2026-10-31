@@ -64,6 +64,24 @@ def test_incremental_rebuilds_after_a_version_change(site, monkeypatch, capsys):
 
     assert "up to date" not in capsys.readouterr().out
 
+def test_incremental_rebuilds_after_a_helper_changes(site, capsys):
+    (site / "_helper.py").write_text("TITLE = 'one'\n")
+    (site / "03_uses_helper.py").write_text(
+        "from lectrace import text\nfrom _helper import TITLE\n\n\n"
+        "def main():\n    text(TITLE)\n\n\nmain()\n"
+    )
+    out = site / "_site"
+    build(output=out)
+    (site / "_helper.py").write_text("TITLE = 'two'\n")
+    capsys.readouterr()
+
+    build(output=out, incremental=True)
+
+    printed = capsys.readouterr().out
+    assert "03_uses_helper.py :: building" in printed
+    # Lectures that don't import the helper stay cached.
+    assert "01_one.py :: up to date" in printed
+
 def test_full_build_still_prunes_deleted_lectures(site):
     out = site / "_site"
     build(output=out)
