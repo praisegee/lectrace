@@ -184,7 +184,11 @@ function firstSlice(contents: unknown, shape: number[], truncated?: boolean): Ce
   return x as Cell[][];
 }
 
-/** Diverging blue–white–red around 0 for signed data, white–blue otherwise; NaN/inf in black. */
+/**
+ * Blue is always positive or larger, red always negative: red–white–blue around 0
+ * for mixed signs, white–blue for non-negative data, white–red for non-positive
+ * data. NaN/inf in black.
+ */
 function colorScale(grid: Cell[][]): (v: Cell) => string {
   let lo = Infinity;
   let hi = -Infinity;
@@ -200,9 +204,13 @@ function colorScale(grid: Cell[][]): (v: Cell) => string {
   if (lo < 0 && hi > 0) {
     const m = Math.max(-lo, hi);
     return (v) => typeof v !== "number" ? "#000"
-      : v < 0 ? mix(WHITE, BLUE, -v / m) : mix(WHITE, RED, v / m);
+      : v < 0 ? mix(WHITE, RED, -v / m) : mix(WHITE, BLUE, v / m);
   }
   const span = hi - lo || 1;
+  if (lo < 0) {
+    // All values ≤ 0: white nearest 0, deepening to red at the most negative.
+    return (v) => typeof v !== "number" ? "#000" : mix(WHITE, RED, (hi - v) / span);
+  }
   return (v) => typeof v !== "number" ? "#000" : mix(WHITE, BLUE, (v - lo) / span);
 }
 
