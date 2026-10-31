@@ -713,12 +713,59 @@ body.resizing {
   display: inline-flex;
   flex-direction: column;
   gap: 3px;
+  /* As wide as the label, table or heatmap; stats and captions wrap under them. */
+  width: min-content;
 }
 
 .tensor-label {
+  white-space: nowrap;
   font-size: 13px;
   color: var(--color-muted);
   font-family: var(--font-code);
+}
+
+.tensor-toggle {
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+.tensor-summary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 13px;
+  font-family: var(--font-code);
+  font-variant-numeric: tabular-nums;
+}
+
+.tensor-summary > span {
+  white-space: nowrap;
+}
+
+.tensor-badge {
+  color: #fff;
+  background: var(--color-error);
+  border-radius: 3px;
+  padding: 0 5px;
+}
+
+.tensor-heatmap {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tensor-heatmap canvas {
+  image-rendering: pixelated;
+  border: 1px solid var(--color-border);
+  align-self: flex-start;
+}
+
+.tensor-hover {
+  font-size: 12px;
+  color: var(--color-muted);
+  font-family: var(--font-code);
+  min-height: 1.4em;
 }
 
 .matrix {

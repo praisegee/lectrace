@@ -41,9 +41,19 @@ export type Value =
   | { type: "int" | "float"; contents: number | string }
   | { type: "str"; contents: string }
   | { type: "complex"; contents: { real: number; imag: number } }
-  | { type: string; contents: Value[]; shape?: number[]; dtype?: string }
+  | { type: string; contents: Value[]; shape?: number[]; dtype?: string; summary?: TensorSummary; truncated?: boolean }
   | { type: string; contents: Record<string, Value> }
   | { type: string; contents: string | number | boolean | null };
+
+/** Stats over all of a tensor's elements; mean/std/min/max cover finite values only. */
+export interface TensorSummary {
+  nan: number;
+  inf: number;
+  mean?: number;
+  std?: number;
+  min?: number;
+  max?: number;
+}
 
 export interface TableData {
   headers: string[];
