@@ -175,3 +175,83 @@ def test_invisible_variable_visible_in_next_step():
     env_steps = [s for s in trace.steps if "z" in s.env]
     assert env_steps
     assert env_steps[-1].env["z"]["contents"] == 3
+
+
+def test_named_states_mark_their_steps():
+    path = _write("""
+        def main():
+            a = 1  # @state Setup
+            b = 2
+            c = a + b  # @state Add them
+    """)
+    trace = execute(path)
+    assert [s.name for s in trace.states] == ["Setup", "Add them"]
+    first, second = trace.states
+    assert trace.steps[first.step_index].stack[-1].line_number == first.line_number == 3
+    assert trace.steps[second.step_index].stack[-1].line_number == 5
+    assert first.step_index < second.step_index
+    assert first.elapsed_s >= 0 and second.elapsed_s >= 0
+
+
+def test_named_state_in_loop_marks_first_pass_only():
+    path = _write("""
+        def main():
+            total = 0
+            for i in range(3):
+                total += i  # @state Accumulate
+    """)
+    trace = execute(path)
+    assert len(trace.states) == 1
+    first_hit = next(
+        i for i, s in enumerate(trace.steps) if s.stack[-1].line_number == 5
+    )
+    assert trace.states[0].step_index == first_hit
+
+
+def test_named_state_inside_helper():
+    path = _write("""
+        def helper():
+            return 1  # @state In helper
+
+        def main():
+            x = helper()  # @state Call
+    """)
+    trace = execute(path)
+    assert [s.name for s in trace.states] == ["Call", "In helper"]
+    assert trace.steps[trace.states[1].step_index].stack[-1].function_name == "helper"
+
+
+def test_named_state_under_stepover_is_skipped():
+    path = _write("""
+        def helper():
+            return 1  # @state In helper
+
+        def main():
+            x = helper()  # @stepover
+    """)
+    assert execute(path).states == []
+
+
+def test_named_state_timing_covers_slow_section():
+    path = _write("""
+        import time
+
+        def main():
+            a = 1  # @state Fast
+            b = 2  # @state Slow
+            time.sleep(0.2)
+            c = 3  # @state End
+    """)
+    fast, slow, _end = execute(path).states
+    assert slow.elapsed_s >= 0.2 > fast.elapsed_s
+
+
+def test_states_survive_error():
+    path = _write("""
+        def main():
+            a = 1  # @state Before
+            raise RuntimeError("oops")
+    """)
+    trace = execute(path)
+    assert trace.metadata.error is not None
+    assert [s.name for s in trace.states] == ["Before"]

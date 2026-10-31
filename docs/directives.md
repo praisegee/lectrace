@@ -116,6 +116,28 @@ The viewer steps are only `text(...)`, `x = ...`, `y = ...`, `plot(ax)`. The mat
 
 ---
 
+## @state
+
+Name a point in the run. Each named state becomes a chapter in the viewer: a dropdown in the top bar jumps between them, tick marks on the progress bar show where they are, and `[` / `]` step to the previous or next one.
+
+```python
+def main():
+    tokens = tokenize(text)          # @state Tokenization
+    scores = q @ k.T / math.sqrt(d)  # @state Attention scores
+    probs = softmax(scores)
+    out = probs @ v                  # @state Weighted sum
+```
+
+Everything after `@state` on the line is the name, so names can have spaces. A state runs until the next one starts.
+
+- **In a loop**, a state marks only the first pass, so the chapter starts where the idea is introduced.
+- **Inside a helper function**, a state works as long as the call isn't under `@stepover`; a stepped-over call records no steps, so there is nothing to mark.
+- **Link to a state** with `?state=<name>` in the viewer URL instead of `?step=<n>`. Step numbers change when you edit the lecture; state names don't.
+
+The dropdown also shows each state's share of the run time. Tracing slows code down a lot, so use this to compare states with each other ("training takes most of the time"), not as real timings.
+
+---
+
 ## Combining directives
 
 Multiple directives on the same line are all applied:
@@ -125,6 +147,13 @@ x = compute()  # @inspect x @stepover
 ```
 
 This inspects `x` after the line runs and steps over the `compute()` call.
+
+`@state` takes every word after it as the name, up to the next directive, so both orders work:
+
+```python
+q = x @ w_q  # @inspect q @state Queries
+q = x @ w_q  # @state Queries @inspect q
+```
 
 ---
 

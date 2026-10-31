@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTrace } from "../../hooks/useTrace";
-import { useNavigation } from "../../hooks/useNavigation";
+import { currentStateIndex, useNavigation } from "../../hooks/useNavigation";
 import { useKeyboard } from "../../hooks/useKeyboard";
 import { useSwipe } from "../../hooks/useSwipe";
 import { NavigationBar } from "./NavigationBar";
@@ -22,8 +22,22 @@ export function TraceViewer({ onToggleSidebar }: Props) {
   const { trace, loading, error } = useTrace(tracePath);
 
   const setStep = (i: number) => setParams((p) => { p.set("step", String(i)); return p; });
-  const { stepForward, stepBackward, stepOverForward, stepOverBackward, stepUp } =
-    useNavigation(trace, stepParam, setStep);
+  const {
+    stepForward, stepBackward, stepOverForward, stepOverBackward, stepUp, nextState, prevState,
+  } = useNavigation(trace, stepParam, setStep);
+
+  // ?state=<name> links to a named state; it resolves to a step once the trace
+  // loads, so the link keeps working when edits shift the step numbers.
+  const stateParam = params.get("state");
+  useEffect(() => {
+    if (!trace || stateParam === null) return;
+    const st = trace.states?.find((s) => s.name === stateParam);
+    setParams((p) => {
+      p.delete("state");
+      if (st) p.set("step", String(st.step_index));
+      return p;
+    }, { replace: true });
+  }, [trace, stateParam, setParams]);
 
   const [pinnedView, setPinnedView] = useState<{ path: string; line: number } | null>(null);
   useEffect(() => { setPinnedView(null); }, [stepParam]);
@@ -90,6 +104,8 @@ export function TraceViewer({ onToggleSidebar }: Props) {
     "Shift+ArrowRight": stepOverForward, j: stepOverForward,
     "Shift+ArrowLeft": stepOverBackward, k: stepOverBackward,
     u: stepUp,
+    "]": nextState,
+    "[": prevState,
     R: () => toggle("raw", "1"),
     A: toggleAnimate,
     E: () => toggle("hideEnv", "1"),
@@ -163,6 +179,9 @@ export function TraceViewer({ onToggleSidebar }: Props) {
         title={trace.metadata.title}
         stepIndex={stepIndex}
         totalSteps={trace.steps.length}
+        states={trace.states ?? []}
+        currentState={currentStateIndex(trace.states ?? [], stepIndex)}
+        onGotoStep={setStep}
         rawMode={rawMode}
         animateMode={animateMode}
         hideEnv={hideEnv}

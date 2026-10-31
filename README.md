@@ -109,6 +109,7 @@ Inline comments that control tracing and display:
 | `# @clear x`     | Remove `x` from the variable panel                         |
 | `# @stepover`    | Execute this line without stepping into any calls it makes |
 | `# @hide`        | Run this line silently, never shown in the viewer          |
+| `# @state Name`  | Mark a named state: a chapter you can jump to in the viewer |
 
 ---
 

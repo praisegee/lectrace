@@ -11,6 +11,8 @@ All shortcuts work while the viewer is focused on desktop.
 | `Shift+→` or `j` | Step over forward — advance without descending into function calls |
 | `Shift+←` or `k` | Step over backward |
 | `u` | Step out of current function, return to the caller |
+| `]` | Jump to the next named state (see [`@state`](directives.md#state)) |
+| `[` | Jump to the start of the current named state, or the previous one if already there |
 
 Click any line number to jump directly to the first step on that line.
 

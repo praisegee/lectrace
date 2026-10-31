@@ -4,6 +4,18 @@ export interface Trace {
   files: Record<string, string>;
   hidden_line_numbers: Record<string, number[]>;
   steps: Step[];
+  /** Absent in traces built before named states existed. */
+  states?: NamedState[];
+}
+
+/** A point the author named with `# @state`; the viewer uses these as chapters. */
+export interface NamedState {
+  name: string;
+  step_index: number;
+  path: string;
+  line_number: number;
+  /** Time until the next state; tracing slows code, so only compare these with each other. */
+  elapsed_s: number;
 }
 
 export interface TraceMetadata {

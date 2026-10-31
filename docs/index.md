@@ -36,7 +36,7 @@ lectrace gives you that without any frontend work. Write Python, add a few comme
 - **Variable panel** — inspect named variables as they change
 - **Markdown + LaTeX** — render text, headings, and math inline with code
 - **Interactive charts** — embed Vega-Lite plots directly in lectures
-- **Directives** — `@inspect`, `@hide`, `@stepover`, `@clear` as inline comments
+- **Directives** — `@inspect`, `@hide`, `@stepover`, `@clear`, `@state` as inline comments
 - **Custom type rendering** — implement `__lectrace__` on any class
 - **Zero configuration** — auto-discovers lecture files, deploys to GitHub Pages with one command
 - **Animation mode** — progressively reveal code as you step through it

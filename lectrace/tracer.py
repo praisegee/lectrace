@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import sys
+import time
 import traceback as tb
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -14,11 +15,13 @@ from lectrace.directives import (
     HIDE,
     INSPECT,
     INVISIBLE,
+    STATE,
     STEPOVER,
     clear_vars,
     has,
     inspect_vars,
     parse,
+    state_name,
 )
 from lectrace.files import relativize
 from lectrace.renderings import Rendering, _set_active, flush
@@ -48,6 +51,22 @@ class TraceError:
 
 
 @dataclass(frozen=True)
+class NamedState:
+    """A point in the run the author named with `# @state`, used as a chapter.
+
+    `elapsed_s` is the time from this state to the next one (or to the end of
+    the run). Tracing slows code down a lot, so it is only useful for
+    comparing states with each other.
+    """
+
+    name: str
+    step_index: int
+    path: str
+    line_number: int
+    elapsed_s: float
+
+
+@dataclass(frozen=True)
 class TraceMetadata:
     title: str
     module: str
@@ -65,6 +84,7 @@ class Trace:
     files: dict[str, str]
     hidden_line_numbers: dict[str, list[int]]
     steps: list[Step]
+    states: list[NamedState] = field(default_factory=list)
 
 
 def _statement_lines(source_text: str) -> set[int]:
@@ -125,6 +145,8 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
     steps: list[Step] = []
     visible: set[str] = set()
     stepovers: list[tuple[str, int]] = []
+    # (name, step index, path, line, perf_counter) for each state's first hit.
+    state_hits: list[tuple[str, int, str, int, float]] = []
     error: TraceError | None = None
 
     src_text = source.read_text(encoding="utf-8")
@@ -150,6 +172,8 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
     inspect_functions: set[int] = set()
     for i, line in enumerate(src_lines, start=1):
         directives = parse(line)
+        if has(directives, STATE) and state_name(directives) is None:
+            print(f"Warning: @state on line {i} needs a name, e.g. # @state Attention scores")
         if has(directives, INSPECT) and not inspect_vars(directives):
             if line.lstrip().startswith("def "):
                 inspect_functions.add(i)
@@ -246,6 +270,14 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
             steps.append(step)
         step_index = len(steps) - 1
 
+        # A state inside a loop marks only its first pass, so a chapter starts
+        # where the idea is introduced rather than at the last iteration.
+        name = state_name(directives)
+        if name is not None and all(h[0] != name for h in state_hits):
+            state_hits.append(
+                (name, step_index, current.path, current.line_number, time.perf_counter())
+            )
+
         def after_line(frame, event, arg):
             target = steps[step_index]
 
@@ -308,6 +340,7 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         finally:
             sys.settrace(None)
             _set_active(False)
+    end_time = time.perf_counter()
 
     sys.modules.pop("_lecture", None)
     if _added_to_path and source_dir in sys.path:
@@ -327,12 +360,25 @@ def execute(source: Path, inspect_all: bool = False) -> Trace:
         error=error,
     )
 
+    ends = [h[4] for h in state_hits[1:]] + [end_time]
+    states = [
+        NamedState(
+            name=name,
+            step_index=step_index,
+            path=path,
+            line_number=line_number,
+            elapsed_s=end - start,
+        )
+        for (name, step_index, path, line_number, start), end in zip(state_hits, ends)
+    ]
+
     return Trace(
         version="2",
         metadata=metadata,
         files=files,
         hidden_line_numbers=hidden,
         steps=steps,
+        states=states,
     )
 
 
