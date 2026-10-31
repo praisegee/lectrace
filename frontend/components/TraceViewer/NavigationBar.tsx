@@ -2,7 +2,7 @@ import {
   PlayIcon, PauseIcon, CodeIcon, PanelIcon,
   ExpandIcon, CompressIcon,
   StepBackIcon, StepFwdIcon, SkipBackIcon, SkipFwdIcon, StepOutIcon,
-  SidebarIcon,
+  SidebarIcon, WrapIcon,
 } from "../icons";
 import type { NamedState } from "../../types/trace";
 
@@ -16,6 +16,7 @@ interface Props {
   onGotoStep: (i: number) => void;
   rawMode: boolean;
   animateMode: boolean;
+  wrapMode: boolean;
   hideEnv: boolean;
   isFullscreen: boolean;
   onToggleSidebar: () => void;
@@ -26,16 +27,17 @@ interface Props {
   onStepUp: () => void;
   onToggleRaw: () => void;
   onToggleAnimate: () => void;
+  onToggleWrap: () => void;
   onToggleEnv: () => void;
   onToggleFullscreen: () => void;
 }
 
 export function NavigationBar({
   path, title, stepIndex, totalSteps, states, currentState, onGotoStep,
-  rawMode, animateMode, hideEnv, isFullscreen,
+  rawMode, animateMode, wrapMode, hideEnv, isFullscreen,
   onToggleSidebar,
   onStepForward, onStepBackward, onStepOverForward, onStepOverBackward, onStepUp,
-  onToggleRaw, onToggleAnimate, onToggleEnv, onToggleFullscreen,
+  onToggleRaw, onToggleAnimate, onToggleWrap, onToggleEnv, onToggleFullscreen,
 }: Props) {
   const pct = totalSteps > 1 ? (stepIndex / (totalSteps - 1)) * 100 : 0;
 
@@ -66,6 +68,9 @@ export function NavigationBar({
           </button>
           <button title="Toggle raw code view [R]" onClick={onToggleRaw} className={`nav-btn-raw${rawMode ? " active" : ""}`}>
             <CodeIcon />
+          </button>
+          <button title="Toggle line wrapping [W]" onClick={onToggleWrap} className={wrapMode ? "active" : ""}>
+            <WrapIcon />
           </button>
           <button title="Toggle variables panel [E]" onClick={onToggleEnv} className={!hideEnv ? "active" : ""}>
             <PanelIcon />

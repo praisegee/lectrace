@@ -44,12 +44,15 @@ export function TraceViewer({ onToggleSidebar }: Props) {
 
   const rawMode = params.get("raw") === "1";
   const animateMode = params.get("animate") !== "0";
+  const wrapMode = params.get("wrap") !== "0";
   const hideEnv = params.get("hideEnv") === "1";
 
   const toggle = (key: string, val: string) =>
     setParams((p) => { p.get(key) ? p.delete(key) : p.set(key, val); return p; });
   const toggleAnimate = () =>
     setParams((p) => { animateMode ? p.set("animate", "0") : p.delete("animate"); return p; });
+  const toggleWrap = () =>
+    setParams((p) => { wrapMode ? p.set("wrap", "0") : p.delete("wrap"); return p; });
 
   // Fullscreen
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -108,9 +111,10 @@ export function TraceViewer({ onToggleSidebar }: Props) {
     "[": prevState,
     R: () => toggle("raw", "1"),
     A: toggleAnimate,
+    W: toggleWrap,
     E: () => toggle("hideEnv", "1"),
     F: toggleFullscreen,
-  }, [trace, stepParam, rawMode, animateMode, hideEnv, isFullscreen]);
+  }, [trace, stepParam, rawMode, animateMode, wrapMode, hideEnv, isFullscreen]);
 
   if (!tracePath) return null;
   if (loading) return <div className="status-msg">Loading…</div>;
@@ -184,6 +188,7 @@ export function TraceViewer({ onToggleSidebar }: Props) {
         onGotoStep={setStep}
         rawMode={rawMode}
         animateMode={animateMode}
+        wrapMode={wrapMode}
         hideEnv={hideEnv}
         isFullscreen={isFullscreen}
         onToggleSidebar={onToggleSidebar}
@@ -194,6 +199,7 @@ export function TraceViewer({ onToggleSidebar }: Props) {
         onStepUp={stepUp}
         onToggleRaw={() => toggle("raw", "1")}
         onToggleAnimate={toggleAnimate}
+        onToggleWrap={toggleWrap}
         onToggleEnv={() => toggle("hideEnv", "1")}
         onToggleFullscreen={toggleFullscreen}
       />
@@ -209,6 +215,7 @@ export function TraceViewer({ onToggleSidebar }: Props) {
             lineNumber={displayLine}
             stepIndex={stepIndex}
             rawMode={rawMode}
+            wrapMode={wrapMode}
             animateMode={animateMode && pinnedView === null}
             entryDefLine={entryDefLine}
             onGotoLine={gotoLine}

@@ -77,6 +77,27 @@ body.resizing {
   transition: width 0.22s ease;
 }
 
+/* Drag handle on the sidebar's right edge (desktop) */
+.sidebar-resize-handle {
+  width: 4px;
+  margin-left: -4px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  position: relative;
+  z-index: 1;
+  transition: background 0.15s;
+}
+
+.sidebar-resize-handle:hover,
+.resizing .sidebar-resize-handle {
+  background: var(--color-accent);
+}
+
+/* Follow the pointer while dragging instead of easing behind it. */
+.resizing .trace-browser {
+  transition: none;
+}
+
 /* Desktop sidebar collapse */
 .sidebar-collapsed .trace-browser {
   width: 0;
@@ -402,7 +423,6 @@ body.resizing {
   font-size: 18px;
   line-height: 1.65;
   padding: 8px 0;
-  max-width: 1080px;
 }
 
 .line {
@@ -448,6 +468,17 @@ body.resizing {
   flex: 1;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+/* Wrapping off: long code lines run on and the code panel scrolls sideways.
+   Rendered text keeps the panel's width so prose still wraps. */
+.lines-panel.no-wrap .line {
+  flex-wrap: nowrap;
+}
+
+.lines-panel.no-wrap .code-line {
+  white-space: pre;
+  word-break: normal;
 }
 
 .line-gap {
@@ -1240,7 +1271,8 @@ body.resizing {
     flex-direction: column;
   }
 
-  /* Hide desktop resize handle */
+  /* Hide desktop resize handles */
+  .sidebar-resize-handle,
   .viewer-resize-handle {
     display: none;
   }
@@ -1365,7 +1397,6 @@ body.resizing {
   /* Code font on phones — readable but fits more */
   .lines-panel {
     font-size: 16px;
-    max-width: none;
   }
 
   .line-number {
@@ -1412,9 +1443,5 @@ body.resizing {
 @media (min-width: 641px) and (max-width: 1024px) {
   :root {
     --sidebar-width: 228px;
-  }
-
-  .lines-panel {
-    max-width: none;
   }
 }

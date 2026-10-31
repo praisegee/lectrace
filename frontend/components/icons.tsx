@@ -106,6 +106,17 @@ export function StepOutIcon({ size }: { size?: number }) {
   );
 }
 
+export function WrapIcon({ size }: { size?: number }) {
+  return (
+    <Svg size={size}>
+      <line x1="2" y1="3.5" x2="14" y2="3.5" />
+      <path d="M2 8h10a2.5 2.5 0 0 1 0 5H8" />
+      <polyline points="9.5,11 7.5,13 9.5,15" />
+      <line x1="2" y1="12.5" x2="5" y2="12.5" />
+    </Svg>
+  );
+}
+
 export function SidebarIcon({ size }: { size?: number }) {
   return (
     <Svg size={size}>
