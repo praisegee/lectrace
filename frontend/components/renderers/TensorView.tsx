@@ -6,7 +6,7 @@ const MAX_ROWS = 8;
 const MAX_COLS = 10;
 // Below this many elements the numbers themselves are easier to read than stats.
 const SUMMARY_MIN_SIZE = 16;
-const HEATMAP_PX = 160;
+const HEATMAP_PX = 240;
 
 type Cell = number | string;
 
